@@ -1,0 +1,53 @@
+{% extends "plantillaPrincipal.html" %}
+{% block contenido %}
+<center>
+    <br>
+    <h1><b>Listado de Vehículos</b>
+        <a href="/vehiculos/nuevo/" class="btn btn-info text-white">
+            <i class="fa fa-plus"></i> Nuevo Vehículo
+        </a>
+        <a href="/vehiculos/reporte/" onclick="window.open(this.href, 'Reporte de Vehículos', 'width=900,height=700, resizable=yes, scrollbars=yes'); return false;" class="btn btn-dark text-white">
+            <i class="fa fa-print"></i> Imprimir Vehículos
+        </a>
+    </h1>
+</center>
+<br>
+<div class="container">
+    <table id="tbl_vehiculos" class="table table-striped table-hover table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>CLIENTE</th>
+                <th>PLACA</th>
+                <th>MARCA / MODELO</th>
+                <th>AÑO</th>
+                <th>TIPO</th>
+                <th>ACCIONES</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for vehiculo in vehiculos %}
+            <tr>
+                <td>{{ vehiculo.id }}</td>
+                <td>{{ vehiculo.cliente.nombre }} {{ vehiculo.cliente.apellido }}</td>
+                <td>{{ vehiculo.placa }}</td>
+                <td>{{ vehiculo.marca }} {{ vehiculo.modelo }}</td>
+                <td>{{ vehiculo.anio }}</td>
+                <td>{{ vehiculo.get_tipo_display }}</td>
+                <td class="text-nowrap">
+                    <a href="/vehiculos/editar/{{ vehiculo.id }}" class="btn btn-outline-warning" title="Editar"><i class="fa fa-edit"></i></a>
+                    <a href="/vehiculos/eliminar/{{ vehiculo.id }}" class="btn btn-outline-danger" title="Eliminar" onclick="event.preventDefault(); const link = this; Swal.fire({title:'¿Eliminar este vehículo?', text:'Se perderán los datos relacionados', icon:'warning', showCancelButton:true, confirmButtonText:'Sí, eliminar', cancelButtonText:'Cancelar'}).then((result)=>{if(result.isConfirmed){window.location.href=link.href;}});"><i class="fa fa-trash"></i></a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script>
+$(function(){
+    if ($.fn.DataTable) {
+        $('#tbl_vehiculos').DataTable({ dom: 'Bfrtip', buttons: ['copy','excel','pdf','print'] });
+    }
+});
+</script>
+{% endblock %}

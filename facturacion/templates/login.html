@@ -1,0 +1,153 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>CarServ – Iniciar Sesión</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <!-- Favicon -->
+    <link href="{% static 'img/favicon.ico' %}" rel="icon">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700&family=Ubuntu:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Bootstrap + Template -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <style>
+        body {
+            background-image: url("{% static 'img/carousel-bg-1.jpg' %}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .login-overlay {
+            background: rgba(0, 0, 0, 0.60);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 15px;
+        }
+        .login-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 45px 40px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 10px 40px rgba(0,0,0,.3);
+        }
+        .login-card .brand i { font-size: 2.2rem; }
+        .login-card .brand h2 { font-size: 1.8rem; }
+        .form-control:focus { border-color: #0d6efd; box-shadow: none; }
+        .btn-login {
+            background: var(--bs-primary, #0d6efd);
+            border: none;
+            height: 48px;
+            font-weight: 600;
+            letter-spacing: .5px;
+        }
+        .btn-login:hover { opacity: .9; }
+        .input-group-text { background: #f8f9fa; border-right: none; }
+        .form-control { border-left: none; }
+    </style>
+</head>
+<body>
+
+<div class="login-overlay">
+    <div class="login-card">
+
+        <!-- Logo -->
+        <div class="brand text-center mb-4">
+            <a href="/" class="text-decoration-none">
+                <h2 class="text-primary m-0"><i class="fa fa-car me-2"></i>CarServ</h2>
+            </a>
+            <p class="text-muted mt-1 mb-0" style="font-size:.9rem;">Sistema de Gestión de Taller</p>
+        </div>
+
+        <!-- Formulario -->
+        <form method="POST" action="/login/">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Usuario</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa fa-user text-primary"></i></span>
+                    <input type="text" name="username" class="form-control" placeholder="Ingresa tu usuario"
+                           required autofocus autocomplete="username">
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Contraseña</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa fa-lock text-primary"></i></span>
+                    <input type="password" name="password" id="passwordInput" class="form-control"
+                           placeholder="Ingresa tu contraseña" required autocomplete="current-password">
+                    <button class="btn btn-outline-secondary" type="button" id="togglePassword" tabindex="-1">
+                        <i class="fa fa-eye" id="eyeIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-login w-100 text-white">
+                Ingresar <i class="fa fa-arrow-right ms-2"></i>
+            </button>
+
+            <a href="/" class="btn btn-outline-secondary w-100 mt-2" style="height:48px; line-height:32px;">
+                <i class="fa fa-arrow-left me-2"></i>Regresar al Inicio
+            </a>
+        </form>
+
+        <p class="text-center text-muted mt-4 mb-0" style="font-size:.82rem;">
+            &copy; {{ year }} CarServ &mdash; Taller Mecánico Automotriz
+        </p>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{% if messages %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        {% for msg in messages %}
+        Swal.fire({
+            title: "{% if msg.tags == 'error' %}Error{% elif msg.tags == 'warning' %}Advertencia{% elif msg.tags == 'info' %}Información{% else %}Confirmación{% endif %}",
+            icon: "{% if msg.tags == 'error' %}error{% elif msg.tags == 'warning' %}warning{% elif msg.tags == 'info' %}info{% else %}success{% endif %}",
+            text: "{{ msg|escapejs }}"
+        });
+        {% endfor %}
+    });
+</script>
+{% endif %}
+
+<!-- Toggle mostrar/ocultar contraseña -->
+<script>
+    document.getElementById('togglePassword').addEventListener('click', function () {
+        const input = document.getElementById('passwordInput');
+        const icon  = document.getElementById('eyeIcon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    });
+</script>
+</body>
+</html>

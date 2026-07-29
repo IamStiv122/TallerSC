@@ -1,0 +1,47 @@
+{% extends "plantillaPrincipal.html" %}
+{% block contenido %}
+<center>
+    <br>
+    <h1><b>Inventario de Repuestos</b>
+        <a href="/repuestos/nuevo/" class="btn btn-info text-white"><i class="fa fa-plus"></i> Nuevo Repuesto</a>
+        <a href="/repuestos/reporte/" onclick="window.open(this.href, 'Reporte de Repuestos', 'width=900,height=700, resizable=yes, scrollbars=yes'); return false;" class="btn btn-dark text-white">
+            <i class="fa fa-print"></i> Imprimir Repuestos
+        </a>
+    </h1>
+</center>
+<br>
+<div class="container">
+    <table id="tbl_repuestos" class="table table-striped table-hover table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>CÓDIGO</th>
+                <th>NOMBRE</th>
+                <th>STOCK</th>
+                <th>PRECIO COSTO</th>
+                <th>PRECIO VENTA</th>
+                {% if request.user.rol == 'admin' %}<th>ACCIONES</th>{% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for repuesto in repuestos %}
+            <tr>
+                <td>{{ repuesto.codigo }}</td>
+                <td>{{ repuesto.nombre }}</td>
+                <td>{{ repuesto.stock }}</td>
+                <td>${{ repuesto.precio_costo }}</td>
+                <td>${{ repuesto.precio_venta }}</td>
+                {% if request.user.rol == 'admin' %}
+                <td class="text-nowrap">
+                    <a href="/repuestos/editar/{{ repuesto.id }}/" class="btn btn-outline-warning"><i class="fa fa-edit"></i></a>
+                    <a href="/repuestos/eliminar/{{ repuesto.id }}/" class="btn btn-outline-danger" onclick="event.preventDefault(); const link = this; Swal.fire({title:'¿Eliminar repuesto?', text:'Se quitará del inventario', icon:'warning', showCancelButton:true, confirmButtonText:'Sí, eliminar', cancelButtonText:'Cancelar'}).then((result)=>{if(result.isConfirmed){window.location.href=link.href;}});"><i class="fa fa-trash"></i></a>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script>
+$(function(){ if ($.fn.DataTable) { $('#tbl_repuestos').DataTable({ dom: 'Bfrtip', buttons: ['copy','excel','pdf','print'] }); } });
+</script>
+{% endblock %}

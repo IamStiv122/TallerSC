@@ -1,0 +1,418 @@
+{% extends "plantillaPrincipal.html" %}
+{% block contenido %}
+<div class="container py-4">
+
+    <!-- Encabezado -->
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="fa fa-clipboard-check text-primary me-2"></i>Inspección Inicial — 20 Puntos
+            </h2>
+            <p class="text-muted mb-0">
+                Orden <strong>{{ orden.numero }}</strong> &nbsp;·&nbsp;
+                {{ orden.vehiculo.placa }} – {{ orden.vehiculo.marca }} {{ orden.vehiculo.modelo }}
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" id="btn-tour" class="btn btn-info text-white">
+                <i class="fa fa-route me-1"></i> Iniciar guía interactiva
+            </button>
+            <a href="/ordenes/{{ orden.id }}/" class="btn btn-outline-secondary">
+                <i class="fa fa-arrow-left me-1"></i> Volver
+            </a>
+        </div>
+    </div>
+
+    <!-- Alerta si ya fue registrada -->
+    {% if inspeccion %}
+    <div class="alert alert-success border-0 shadow-sm mb-4">
+        <i class="fa fa-check-circle me-2"></i>
+        Esta inspección ya fue registrada. Puedes actualizarla.
+    </div>
+    {% endif %}
+
+    <form action="/ordenes/{{ orden.id }}/inspeccion/guardar/" method="post" id="form-inspeccion">
+        {% csrf_token %}
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 pt-3 pb-0 px-4">
+                <h6 class="fw-semibold mb-0">
+                    <i class="fa fa-list-ol text-secondary me-2"></i>Puntos de revisión
+                </h6>
+                <p class="text-muted small mb-2">Selecciona el estado de cada punto. Usa la guía para ir paso a paso.</p>
+            </div>
+            <div class="card-body px-4 pb-4">
+                <div class="row g-3">
+
+                    {% with prev=inspeccion %}
+
+                    <div class="col-md-6" id="paso-01">
+                        <label class="form-label fw-semibold">1. Frenos delanteros</label>
+                        <select class="form-control" name="p01">
+                            {% for v,l in opciones %}<option value="{{ v }}" {% if prev and prev.p01_frenos_delanteros == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6" id="paso-02">
+                        <label class="form-label fw-semibold">2. Frenos traseros</label>
+                        <select class="form-control" name="p02">
+                            {% for v,l in opciones %}<option value="{{ v }}" {% if prev and prev.p02_frenos_traseros == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6" id="paso-03">
+                        <label class="form-label fw-semibold">3. Nivel de aceite del motor</label>
+                        <select class="form-control" name="p03">
+                            {% for v,l in opciones %}<option value="{{ v }}" {% if prev and prev.p03_aceite_motor == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6" id="paso-04">
+                        <label class="form-label fw-semibold">4. Líquido de frenos</label>
+                        <select class="form-control" name="p04">
+                            {% for v,l in opciones %}<option value="{{ v }}" {% if prev and prev.p04_liquido_frenos == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6" id="paso-05">
+                        <label class="form-label fw-semibold">5. Líquido refrigerante</label>
+                        <select class="form-control" name="p05">
+                            {% for v,l in opciones %}<option value="{{ v }}" {% if prev and prev.p05_liquido_refrigerante == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6" id="paso-06">
+                        <label class="form-label fw-semibold">6. Batería</label>
+                        <select class="form-control" name="p06">
+                            {% for v,l in opciones %}<option value="{{ v }}" {% if prev and prev.p06_bateria == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6" id="paso-07">
+                        <label class="form-label fw-semibold">7. Alternador</label>
+                        <select class="form-control" name="p07">
+                            {% for v,l in opciones %}<option value="{{ v }}" {% if prev and prev.p07_alternador == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6" id="paso-08">
+                        <label class="form-label fw-semibold">8. Filtro de aire</label>
+                        <select class="form-control" name="p08">
+                            {% for v,l in opciones %}<option value="{{ v }}" {% if prev and prev.p08_filtro_aire == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6" id="paso-09">
+                        <label class="form-label fw-semibold">9. Bujías</label>
+                        <select class="form-control" name="p09">
+                            {% for v,l in opciones %}<option value="{{ v }}" {% if prev and prev.p09_bujias == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6" id="paso-10">
+                        <label class="form-label fw-semibold">10. Correa de distribución</label>
+                        <select class="form-control" name="p10">
+                            {% for v,l in opciones %}<option value="{{ v }}" {% if prev and prev.p10_correa_distribucion == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6" id="paso-11">
+                        <label class="form-label fw-semibold">11. Suspensión delantera</label>
+                        <select class="form-control" name="p11">
+                            {% for v,l in opciones %}<option value="{{ v }}" {% if prev and prev.p11_suspension_delantera == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6" id="paso-12">
+                        <label class="form-label fw-semibold">12. Suspensión trasera</label>
+                        <select class="form-control" name="p12">
+                            {% for v,l in opciones %}<option value="{{ v }}" {% if prev and prev.p12_suspension_trasera == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6" id="paso-13">
+                        <label class="form-label fw-semibold">13. Neumáticos</label>
+                        <select class="form-control" name="p13">
+                            {% for v,l in opciones %}<option value="{{ v }}" {% if prev and prev.p13_neumaticos == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6" id="paso-14">
+                        <label class="form-label fw-semibold">14. Alineación</label>
+                        <select class="form-control" name="p14">
+                            {% for v,l in opciones %}<option value="{{ v }}" {% if prev and prev.p14_alineacion == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6" id="paso-15">
+                        <label class="form-label fw-semibold">15. Sistema de escape</label>
+                        <select class="form-control" name="p15">
+                            {% for v,l in opciones %}<option value="{{ v }}" {% if prev and prev.p15_escape == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6" id="paso-16">
+                        <label class="form-label fw-semibold">16. Transmisión</label>
+                        <select class="form-control" name="p16">
+                            {% for v,l in opciones %}<option value="{{ v }}" {% if prev and prev.p16_transmision == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6" id="paso-17">
+                        <label class="form-label fw-semibold">17. Dirección</label>
+                        <select class="form-control" name="p17">
+                            {% for v,l in opciones %}<option value="{{ v }}" {% if prev and prev.p17_direccion == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6" id="paso-18">
+                        <label class="form-label fw-semibold">18. Luces (todas)</label>
+                        <select class="form-control" name="p18">
+                            {% for v,l in opciones %}<option value="{{ v }}" {% if prev and prev.p18_luces == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6" id="paso-19">
+                        <label class="form-label fw-semibold">19. Limpiaparabrisas</label>
+                        <select class="form-control" name="p19">
+                            {% for v,l in opciones %}<option value="{{ v }}" {% if prev and prev.p19_limpiabrisas == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6" id="paso-20">
+                        <label class="form-label fw-semibold">20. Carrocería (visual)</label>
+                        <select class="form-control" name="p20">
+                            {% for v,l in opciones %}<option value="{{ v }}" {% if prev and prev.p20_carroceria_visual == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                        </select>
+                    </div>
+
+                    {% endwith %}
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Observaciones -->
+        <div class="card border-0 shadow-sm mb-4" id="paso-obs">
+            <div class="card-body px-4 py-3">
+                <label class="form-label fw-semibold">
+                    <i class="fa fa-sticky-note text-warning me-1"></i>
+                    Observaciones generales
+                </label>
+                <textarea class="form-control" rows="3" name="observaciones"
+                          placeholder="Anota cualquier detalle adicional del vehículo al momento de la recepción...">{{ inspeccion.observaciones_generales|default:'' }}</textarea>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-success" type="submit" id="paso-guardar">
+                <i class="fa fa-save me-1"></i> Guardar inspección
+            </button>
+            <a href="/ordenes/{{ orden.id }}/" class="btn btn-outline-danger">
+                <i class="fa fa-times me-1"></i> Cancelar
+            </a>
+        </div>
+
+    </form>
+</div>
+
+<script>
+document.getElementById('btn-tour').addEventListener('click', function () {
+
+    // Driver.js v1 IIFE: el constructor está en window.driver.js.driver
+    const { driver } = window.driver.js;
+    const driverObj = driver({
+        showProgress    : true,
+        showButtons     : ['next', 'previous', 'close'],
+        nextBtnText     : 'Siguiente →',
+        prevBtnText     : '← Anterior',
+        doneBtnText     : '✓ Listo',
+        progressText    : 'Punto {{current}} de {{total}}',
+        allowClose      : true,
+        overlayOpacity  : 0.5,
+        onDestroyStarted: () => { if (!driverObj.hasNextStep()) driverObj.destroy(); },
+        steps: [
+            {
+                element : '#paso-01',
+                popover : {
+                    title      : '1. Frenos delanteros',
+                    description: 'Inspecciona visualmente las pastillas y discos delanteros. Verifica que no haya desgaste excesivo ni fugas de líquido.',
+                    side       : 'bottom', align: 'start'
+                }
+            },
+            {
+                element : '#paso-02',
+                popover : {
+                    title      : '2. Frenos traseros',
+                    description: 'Revisa tambores o discos traseros. Escucha si hay ruidos al frenar y comprueba el nivel de desgaste.',
+                    side       : 'bottom', align: 'start'
+                }
+            },
+            {
+                element : '#paso-03',
+                popover : {
+                    title      : '3. Nivel de aceite del motor',
+                    description: 'Con el motor frío, extrae la varilla de nivel. El aceite debe estar entre las marcas MIN y MAX y tener un color claro o ámbar.',
+                    side       : 'bottom', align: 'start'
+                }
+            },
+            {
+                element : '#paso-04',
+                popover : {
+                    title      : '4. Líquido de frenos',
+                    description: 'Revisa el recipiente del líquido de frenos. Debe estar entre MIN y MAX. Un líquido oscuro o bajo indica que necesita cambio.',
+                    side       : 'bottom', align: 'start'
+                }
+            },
+            {
+                element : '#paso-05',
+                popover : {
+                    title      : '5. Líquido refrigerante',
+                    description: 'Verifica el nivel en el depósito de expansión. Debe estar entre MIN y MAX. Nunca abras el radiador con el motor caliente.',
+                    side       : 'bottom', align: 'start'
+                }
+            },
+            {
+                element : '#paso-06',
+                popover : {
+                    title      : '6. Batería',
+                    description: 'Revisa los bornes: deben estar limpios, sin corrosión. Verifica la fecha de fabricación y el estado de los cables.',
+                    side       : 'bottom', align: 'start'
+                }
+            },
+            {
+                element : '#paso-07',
+                popover : {
+                    title      : '7. Alternador',
+                    description: 'Con el motor encendido, el voltaje del sistema debe estar entre 13.5 V y 14.5 V. Ruidos o luz de batería encendida indican problemas.',
+                    side       : 'bottom', align: 'start'
+                }
+            },
+            {
+                element : '#paso-08',
+                popover : {
+                    title      : '8. Filtro de aire',
+                    description: 'Retira el filtro y obsérvalo a contraluz. Si está muy oscuro o tapado, requiere cambio. Afecta directamente el consumo de combustible.',
+                    side       : 'bottom', align: 'start'
+                }
+            },
+            {
+                element : '#paso-09',
+                popover : {
+                    title      : '9. Bujías',
+                    description: 'Retira una bujía de muestra. Electrodos negros o erosionados indican problema. El color marrón claro es normal.',
+                    side       : 'bottom', align: 'start'
+                }
+            },
+            {
+                element : '#paso-10',
+                popover : {
+                    title      : '10. Correa de distribución',
+                    description: 'Inspecciona visualmente: no debe tener grietas, deshilachados ni deformaciones. Consulta el intervalo de cambio del fabricante.',
+                    side       : 'top', align: 'start'
+                }
+            },
+            {
+                element : '#paso-11',
+                popover : {
+                    title      : '11. Suspensión delantera',
+                    description: 'Empuja el capó hacia abajo con fuerza. El vehículo debe rebotar solo una vez. Más de una indica amortiguadores desgastados.',
+                    side       : 'top', align: 'start'
+                }
+            },
+            {
+                element : '#paso-12',
+                popover : {
+                    title      : '12. Suspensión trasera',
+                    description: 'Repite la prueba de empuje en la parte trasera. Revisa también los silentblock y rótulas visualmente.',
+                    side       : 'top', align: 'start'
+                }
+            },
+            {
+                element : '#paso-13',
+                popover : {
+                    title      : '13. Neumáticos',
+                    description: 'Verifica la profundidad del dibujo (mínimo 1.6 mm). Revisa presión, desgaste irregular y presencia de clavos o cortes.',
+                    side       : 'top', align: 'start'
+                }
+            },
+            {
+                element : '#paso-14',
+                popover : {
+                    title      : '14. Alineación',
+                    description: 'Conduce a baja velocidad y suelta el volante brevemente. Si el auto se desvía, requiere alineación. También revisa el desgaste de los neumáticos.',
+                    side       : 'top', align: 'start'
+                }
+            },
+            {
+                element : '#paso-15',
+                popover : {
+                    title      : '15. Sistema de escape',
+                    description: 'Inspecciona tuberías, silenciador y catalizador. Busca óxido, golpes o fugas de gases. Ruidos o humo excesivo indican problemas.',
+                    side       : 'top', align: 'start'
+                }
+            },
+            {
+                element : '#paso-16',
+                popover : {
+                    title      : '16. Transmisión',
+                    description: 'Para automáticos: verifica el nivel y color del ATF (rojo limpio = bueno). Para mecánicos: revisa fugas en la carcasa y estado del embrague.',
+                    side       : 'top', align: 'start'
+                }
+            },
+            {
+                element : '#paso-17',
+                popover : {
+                    title      : '17. Dirección',
+                    description: 'Gira el volante de extremo a extremo. No debe haber ruidos ni juego excesivo. Verifica el nivel del líquido de dirección asistida.',
+                    side       : 'top', align: 'start'
+                }
+            },
+            {
+                element : '#paso-18',
+                popover : {
+                    title      : '18. Luces',
+                    description: 'Comprueba: luces delanteras (cortas y largas), traseras, freno, reversa, intermitentes y luz de placa. Todas deben funcionar.',
+                    side       : 'top', align: 'start'
+                }
+            },
+            {
+                element : '#paso-19',
+                popover : {
+                    title      : '19. Limpiaparabrisas',
+                    description: 'Actívalos y verifica que las gomas limpien sin dejar rayas. Comprueba también el nivel y funcionamiento del lavaparabrisas.',
+                    side       : 'top', align: 'start'
+                }
+            },
+            {
+                element : '#paso-20',
+                popover : {
+                    title      : '20. Carrocería (inspección visual)',
+                    description: 'Rodea el vehículo buscando abolladuras, arañazos, óxido o pintura en mal estado. Documenta los daños pre-existentes para proteger al taller.',
+                    side       : 'top', align: 'start'
+                }
+            },
+            {
+                element : '#paso-obs',
+                popover : {
+                    title      : 'Observaciones generales',
+                    description: 'Anota aquí cualquier detalle adicional: olores, ruidos que reportó el cliente, accesorios o pertenencias dentro del vehículo.',
+                    side       : 'top', align: 'start'
+                }
+            },
+            {
+                element : '#paso-guardar',
+                popover : {
+                    title      : '¡Listo para guardar!',
+                    description: 'Has revisado los 20 puntos. Haz clic en "Guardar inspección" para registrar el estado inicial del vehículo.',
+                    side       : 'top', align: 'start'
+                }
+            }
+        ]
+    });
+
+    driverObj.drive();
+});
+</script>
+
+{% endblock %}

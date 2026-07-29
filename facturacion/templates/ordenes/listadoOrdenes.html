@@ -1,0 +1,66 @@
+{% extends "plantillaPrincipal.html" %}
+{% block contenido %}
+<center>
+    <br>
+    <h1><b>Listado de Órdenes de Trabajo</b>
+        {% if request.user.rol == 'admin' or request.user.rol == 'oficinista' or request.user.is_superuser %}
+        <a href="/ordenes/nueva/" class="btn btn-info text-white"><i class="fa fa-plus"></i> Nueva Orden</a>
+        <a href="/ordenes/reporte/" onclick="window.open(this.href, 'Reporte de Órdenes', 'width=900,height=700, resizable=yes, scrollbars=yes'); return false;" class="btn btn-dark text-white">
+            <i class="fa fa-print"></i> Imprimir Órdenes
+        </a>
+        {% endif %}
+    </h1>
+</center>
+<br>
+<div class="container">
+    {% if request.user.rol == 'cliente' and not request.user.is_superuser %}
+    <div class="alert alert-light border mb-3">
+        <strong>Vista de cliente:</strong> aquí verás únicamente las órdenes asociadas a tus vehículos y el estado actual de cada una.
+    </div>
+    {% elif request.user.rol == 'mecanico' and not request.user.is_superuser %}
+    <div class="alert alert-light border mb-3">
+        <strong>Vista de mecánico:</strong> revisa las órdenes asignadas y actualiza su estado desde el detalle.
+    </div>
+    {% endif %}
+    <table id="tbl_ordenes" class="table table-striped table-hover table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th># OT</th>
+                <th>VEHÍCULO</th>
+                <th>CLIENTE</th>
+                <th>MECÁNICO</th>
+                <th>BAHÍA</th>
+                <th>ESTADO</th>
+                <th>FECHA</th>
+                <th>ACCIONES</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for orden in ordenes %}
+            <tr>
+                <td>{{ orden.numero }}</td>
+                <td>{{ orden.vehiculo.placa }} - {{ orden.vehiculo.marca }} {{ orden.vehiculo.modelo }}</td>
+                <td>{{ orden.vehiculo.cliente.nombre }} {{ orden.vehiculo.cliente.apellido }}</td>
+                <td>{{ orden.mecanico.usuario.get_full_name|default:'Sin asignar' }}</td>
+                <td>{{ orden.bahia.nombre|default:'Sin asignar' }}</td>
+                <td><span class="badge bg-info text-dark">{{ orden.get_estado_display }}</span></td>
+                <td>{{ orden.fecha_ingreso|date:'d/m/Y' }}</td>
+                <td class="text-nowrap">
+                    <a href="/ordenes/{{ orden.id }}/" class="btn btn-outline-primary"><i class="fa fa-eye"></i></a>
+                    {% if request.user.rol == 'admin' or request.user.rol == 'oficinista' or request.user.is_superuser %}
+                    <a href="/ordenes/editar/{{ orden.id }}/" class="btn btn-outline-warning"><i class="fa fa-edit"></i></a>
+                    <a href="/ordenes/eliminar/{{ orden.id }}/" class="btn btn-outline-danger"
+                       onclick="event.preventDefault(); const link = this; Swal.fire({title:'¿Eliminar esta orden?', text:'Esta acción no se puede revertir', icon:'warning', showCancelButton:true, confirmButtonText:'Sí, eliminar', cancelButtonText:'Cancelar'}).then((result)=>{if(result.isConfirmed){window.location.href=link.href;}});">
+                       <i class="fa fa-trash"></i>
+                    </a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script>
+$(function(){ if ($.fn.DataTable) { $('#tbl_ordenes').DataTable({ dom: 'Bfrtip', buttons: ['copy','excel','pdf','print'] }); } });
+</script>
+{% endblock %}

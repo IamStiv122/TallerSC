@@ -1,0 +1,35 @@
+{% extends "plantillaPrincipal.html" %}
+{% block contenido %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+            <br>
+            <h1><b>Agregar Repuesto</b></h1>
+            <hr>
+            <form id="form_nuevo_repuesto" action="/repuestos/guardar/" method="post">
+                {% csrf_token %}
+                <b>Código:</b><br>
+                <input required class="form-control" type="text" name="codigo"><br>
+                <b>Nombre:</b><br>
+                <input required class="form-control" type="text" name="nombre"><br>
+                <b>Descripción:</b><br>
+                <textarea class="form-control" rows="3" name="descripcion"></textarea><br>
+                <b>Precio costo:</b><br>
+                <input required class="form-control" type="number" step="0.01" min="0" name="precio_costo"><br>
+                <b>Precio venta:</b><br>
+                <input required class="form-control" type="number" step="0.01" min="0" name="precio_venta"><br>
+                <b>Stock:</b><br>
+                <input class="form-control" type="number" min="0" name="stock" value="0"><br>
+                <b>Unidad:</b><br>
+                <input class="form-control" type="text" name="unidad" value="unidad"><br>
+                <button class="btn btn-success" type="submit"><i class="fa fa-save"></i> Guardar</button>
+                <a href="/repuestos/" class="btn btn-danger"><i class="fa fa-times"></i> Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+$(function(){ $('#form_nuevo_repuesto').validate({ rules:{ codigo:{required:true}, nombre:{required:true}, precio_costo:{required:true}, precio_venta:{required:true} }, messages:{ codigo:{required:'Ingrese el código'}, nombre:{required:'Ingrese el nombre'}, precio_costo:{required:'Ingrese el costo'}, precio_venta:{required:'Ingrese el precio de venta'} } }); });
+</script>
+{% endblock %}

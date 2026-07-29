@@ -1,0 +1,388 @@
+{% extends "plantillaPrincipal.html" %}
+{% block contenido %}
+<div class="container py-4">
+
+    <!-- Encabezado -->
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="fa fa-clipboard-list text-primary me-2"></i>Orden {{ orden.numero }}
+            </h2>
+            <span class="badge fs-6 px-3 py-2
+                {% if orden.estado == 'pendiente'  %}bg-warning text-dark
+                {% elif orden.estado == 'en_proceso' %}bg-info text-dark
+                {% elif orden.estado == 'pausada'    %}bg-secondary
+                {% elif orden.estado == 'finalizada' %}bg-success
+                {% elif orden.estado == 'entregada'  %}bg-primary
+                {% elif orden.estado == 'cancelada'  %}bg-danger
+                {% endif %}">
+                <i class="fa fa-circle me-1" style="font-size:.6rem;vertical-align:middle;"></i>
+                {{ orden.get_estado_display }}
+            </span>
+        </div>
+        <a href="/ordenes/" class="btn btn-outline-secondary">
+            <i class="fa fa-arrow-left me-1"></i> Volver
+        </a>
+    </div>
+
+    <!-- ── VISTA CLIENTE ─────────────────────────── -->
+    {% if request.user.rol == 'cliente' and not request.user.is_superuser %}
+
+    <div class="row g-4">
+
+        <!-- Datos del vehículo y orden -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pt-3 pb-0 px-4">
+                    <h6 class="fw-semibold mb-0"><i class="fa fa-car text-primary me-2"></i>Tu vehículo</h6>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <p class="mb-2"><span class="text-muted">Placa:</span> <strong>{{ orden.vehiculo.placa }}</strong></p>
+                    <p class="mb-2"><span class="text-muted">Vehículo:</span> {{ orden.vehiculo.marca }} {{ orden.vehiculo.modelo }} {{ orden.vehiculo.anio }}</p>
+                    <p class="mb-2"><span class="text-muted">Color:</span> {{ orden.vehiculo.color|default:"—" }}</p>
+                    <p class="mb-0"><span class="text-muted">Kilometraje de ingreso:</span> {{ orden.kilometraje_ingreso }} km</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estado actual y fechas -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pt-3 pb-0 px-4">
+                    <h6 class="fw-semibold mb-0"><i class="fa fa-calendar-alt text-info me-2"></i>Tiempos</h6>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <p class="mb-2">
+                        <span class="text-muted">Ingreso:</span>
+                        <strong>{{ orden.fecha_ingreso|date:"d/m/Y H:i" }}</strong>
+                    </p>
+                    <p class="mb-2">
+                        <span class="text-muted">Entrega estimada:</span>
+                        {% if orden.fecha_estimada_entrega %}
+                            <strong>{{ orden.fecha_estimada_entrega|date:"d/m/Y H:i" }}</strong>
+                        {% else %}
+                            <span class="text-muted">Por confirmar</span>
+                        {% endif %}
+                    </p>
+                    <p class="mb-0">
+                        <span class="text-muted">Entrega real:</span>
+                        {% if orden.fecha_real_entrega %}
+                            <strong class="text-success">{{ orden.fecha_real_entrega|date:"d/m/Y H:i" }}</strong>
+                        {% else %}
+                            <span class="text-muted">Pendiente</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Problema reportado -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pt-3 pb-0 px-4">
+                    <h6 class="fw-semibold mb-0"><i class="fa fa-tools text-warning me-2"></i>Problema reportado</h6>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <p class="mb-0">{{ orden.descripcion }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Repuestos utilizados -->
+        {% if repuestos %}
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pt-3 pb-0 px-4">
+                    <h6 class="fw-semibold mb-0"><i class="fa fa-cogs text-secondary me-2"></i>Repuestos utilizados</h6>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Repuesto</th>
+                                    <th class="text-center">Cantidad</th>
+                                    <th class="text-end">Precio unit.</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for dr in repuestos %}
+                                <tr>
+                                    <td>{{ dr.repuesto.nombre }}</td>
+                                    <td class="text-center">{{ dr.cantidad }}</td>
+                                    <td class="text-end">${{ dr.precio_unitario }}</td>
+                                    <td class="text-end fw-semibold">${{ dr.subtotal }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Resumen de costos -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pt-3 pb-0 px-4">
+                    <h6 class="fw-semibold mb-0"><i class="fa fa-dollar-sign text-success me-2"></i>Resumen de costos</h6>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Mano de obra:</span>
+                        <strong>${{ orden.mano_obra }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Repuestos:</span>
+                        <strong>${{ orden.total_repuestos }}</strong>
+                    </div>
+                    <hr class="my-2">
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-bold fs-5">Total:</span>
+                        <span class="fw-bold fs-5 text-success">${{ orden.total }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mecánico asignado -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pt-3 pb-0 px-4">
+                    <h6 class="fw-semibold mb-0"><i class="fa fa-user-cog text-primary me-2"></i>Mecánico asignado</h6>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    {% if orden.mecanico %}
+                        <p class="mb-1 fw-semibold fs-5">{{ orden.mecanico.usuario.get_full_name }}</p>
+                        <p class="mb-0 text-muted">{{ orden.mecanico.get_especialidad_display }}</p>
+                    {% else %}
+                        <p class="text-muted mb-0">Pendiente de asignación</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Historial de estado -->
+        {% if historial %}
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pt-3 pb-0 px-4">
+                    <h6 class="fw-semibold mb-0"><i class="fa fa-history text-secondary me-2"></i>Historial de estados</h6>
+                </div>
+                <div class="card-body px-4 pb-3">
+                    <ul class="list-unstyled mb-0">
+                        {% for h in historial %}
+                        <li class="d-flex align-items-start gap-3 pb-3
+                            {% if not forloop.last %}border-bottom mb-3{% endif %}">
+                            <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0"
+                                 style="width:36px;height:36px;">
+                                <i class="fa fa-exchange-alt text-primary" style="font-size:.75rem;"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0 fw-semibold">
+                                    {% if h.estado_anterior %}{{ h.estado_anterior }} →{% endif %}
+                                    {{ h.estado_nuevo }}
+                                </p>
+                                {% if h.observacion %}
+                                <p class="mb-0 text-muted small">{{ h.observacion }}</p>
+                                {% endif %}
+                                <p class="mb-0 text-muted small">{{ h.fecha|date:"d/m/Y H:i" }}</p>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- ── VISTA ADMIN / OFICINISTA / MECÁNICO ───── -->
+    {% else %}
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            {% if request.user.rol != 'cliente' or request.user.is_superuser %}
+            <div class="alert alert-info">
+                <strong>Atajos rápidos:</strong> <kbd>Ctrl+Enter</kbd> → En proceso &nbsp;|&nbsp; <kbd>F2</kbd> → Finalizada
+            </div>
+            {% endif %}
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <h5 class="fw-bold">{{ orden.numero }} — {{ orden.get_estado_display }}</h5>
+                    <p class="mb-1"><b>Vehículo:</b> {{ orden.vehiculo.placa }} – {{ orden.vehiculo.marca }} {{ orden.vehiculo.modelo }}</p>
+                    <p class="mb-1"><b>Cliente:</b> {{ orden.vehiculo.cliente.nombre }} {{ orden.vehiculo.cliente.apellido }}</p>
+                    <p class="mb-1"><b>Mecánico:</b> {{ orden.mecanico.usuario.get_full_name|default:'Sin asignar' }}</p>
+                    <p class="mb-1"><b>Bahía:</b> {{ orden.bahia.nombre|default:'Sin asignar' }}</p>
+                    <p class="mb-1"><b>Descripción:</b> {{ orden.descripcion }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-1"><b>Ingreso:</b> {{ orden.fecha_ingreso|date:"d/m/Y H:i" }}</p>
+                    <p class="mb-1"><b>Entrega estimada:</b> {{ orden.fecha_estimada_entrega|date:"d/m/Y H:i"|default:"—" }}</p>
+                    <p class="mb-1"><b>Entrega real:</b> {{ orden.fecha_real_entrega|date:"d/m/Y H:i"|default:"—" }}</p>
+                    <p class="mb-1"><b>Mano de obra:</b> ${{ orden.mano_obra }}</p>
+                    <p class="mb-1"><b>Total repuestos:</b> ${{ orden.total_repuestos }}</p>
+                    <p class="mb-1"><b>Total:</b> <strong class="text-success">${{ orden.total }}</strong></p>
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                {% if not orden.bahia and request.user.rol == 'mecanico' and not request.user.is_superuser %}
+                <div class="alert alert-warning w-100 py-2 mb-0">
+                    <i class="fa fa-exclamation-triangle me-1"></i>
+                    No puedes cambiar el estado de esta orden hasta que el administrador asigne una <strong>bahía de trabajo</strong>.
+                </div>
+                {% endif %}
+                <button type="button" id="btnAbrirOrden" class="btn btn-primary"
+                    {% if not orden.bahia and request.user.rol == 'mecanico' and not request.user.is_superuser %}disabled title="Se requiere bahía asignada"{% endif %}>
+                    <i class="fa fa-play"></i> Abrir orden <kbd class="ms-1">Ctrl+Enter</kbd>
+                </button>
+                <button type="button" id="btnCerrarOrden" class="btn btn-success"
+                    {% if not orden.bahia and request.user.rol == 'mecanico' and not request.user.is_superuser %}disabled title="Se requiere bahía asignada"{% endif %}>
+                    <i class="fa fa-check"></i> Cerrar orden <kbd class="ms-1">F2</kbd>
+                </button>
+                {% if request.user.rol == 'admin' or request.user.rol == 'oficinista' or request.user.is_superuser %}
+                <a href="/ordenes/editar/{{ orden.id }}/" class="btn btn-warning"><i class="fa fa-edit"></i> Editar</a>
+                {% endif %}
+                {% if request.user.rol == 'admin' or request.user.rol == 'oficinista' or request.user.is_superuser or request.user.rol == 'mecanico' and orden.estado == 'en_proceso' %}
+                <a href="/ordenes/{{ orden.id }}/repuesto/" class="btn btn-outline-secondary"><i class="fa fa-cogs"></i> Agregar repuesto</a>
+                {% endif %}
+                {% if request.user.rol in 'admin,oficinista,mecanico' or request.user.is_superuser %}
+                <a href="/ordenes/{{ orden.id }}/inspeccion/" class="btn btn-outline-info">
+                    <i class="fa fa-clipboard-check"></i>
+                    {% if inspeccion %}Ver / editar inspección{% else %}Iniciar inspección (20 pts){% endif %}
+                </a>
+                {% endif %}
+                <a href="/ordenes/" class="btn btn-secondary"><i class="fa fa-arrow-left"></i> Volver</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Repuestos de la orden -->
+    {% if repuestos %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header"><strong><i class="fa fa-cogs me-2"></i>Repuestos utilizados</strong></div>
+        <div class="card-body">
+            <table class="table table-sm table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Repuesto</th>
+                        <th class="text-center">Cantidad</th>
+                        <th class="text-end">Precio unit.</th>
+                        <th class="text-end">Subtotal</th>
+                        {% if request.user.rol == 'admin' or request.user.rol == 'oficinista' or request.user.is_superuser %}
+                        <th class="text-center">Acción</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dr in repuestos %}
+                    <tr>
+                        <td>{{ dr.repuesto.nombre }}</td>
+                        <td class="text-center">{{ dr.cantidad }}</td>
+                        <td class="text-end">${{ dr.precio_unitario }}</td>
+                        <td class="text-end">${{ dr.subtotal }}</td>
+                        {% if request.user.rol == 'admin' or request.user.rol == 'oficinista' or request.user.is_superuser %}
+                        <td class="text-center">
+                            <a href="/repuesto-orden/eliminar/{{ dr.id }}/"
+                               class="btn btn-sm btn-outline-danger"
+                               onclick="event.preventDefault(); const l=this; Swal.fire({title:'¿Eliminar repuesto?',icon:'warning',showCancelButton:true,confirmButtonText:'Sí',cancelButtonText:'No'}).then(r=>{if(r.isConfirmed)window.location.href=l.href;});">
+                               <i class="fa fa-trash"></i>
+                            </a>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Inspección inicial -->
+    {% if inspeccion %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header"><strong><i class="fa fa-clipboard-check me-2"></i>Inspección inicial (20 puntos)</strong></div>
+        <div class="card-body">
+            <div class="row row-cols-2 row-cols-md-4 g-2">
+                {% with puntos_nombres=inspeccion|dictsort:"pk" %}
+                {% for label, val in inspeccion.get_puntos_display.items %}
+                <div class="col">
+                    <span class="badge w-100 text-start py-2
+                        {% if val == 'OK' %}bg-success
+                        {% elif val == 'Alerta' %}bg-warning text-dark
+                        {% elif val == 'Falla' %}bg-danger
+                        {% else %}bg-light text-muted border{% endif %}">
+                        {{ label }}: {{ val }}
+                    </span>
+                </div>
+                {% endfor %}
+                {% endwith %}
+            </div>
+            {% if inspeccion.observaciones_generales %}
+            <p class="mt-3 mb-0"><strong>Observaciones:</strong> {{ inspeccion.observaciones_generales }}</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Historial de estados -->
+    {% if historial %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header"><strong><i class="fa fa-history me-2"></i>Historial de estados</strong></div>
+        <div class="card-body p-0">
+            <table class="table table-sm mb-0">
+                <thead class="table-light">
+                    <tr><th>Fecha</th><th>Anterior</th><th>Nuevo</th><th>Observación</th><th>Usuario</th></tr>
+                </thead>
+                <tbody>
+                    {% for h in historial %}
+                    <tr>
+                        <td>{{ h.fecha|date:"d/m/Y H:i" }}</td>
+                        <td>{{ h.estado_anterior|default:"—" }}</td>
+                        <td><span class="badge bg-secondary">{{ h.estado_nuevo }}</span></td>
+                        <td>{{ h.observacion|default:"—" }}</td>
+                        <td>{{ h.cambiado_por.get_full_name|default:h.cambiado_por.username|default:"—" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <form id="formEstadoOrden" method="post" action="/ordenes/estado/{{ orden.id }}/" class="d-none">
+        {% csrf_token %}
+        <input type="hidden" name="estado" id="estado-orden">
+        <input type="hidden" name="observacion" value="Cambio rápido por teclado">
+    </form>
+
+    <script src="https://cdn.jsdelivr.net/npm/hotkeys-js@3.13.0/dist/hotkeys.min.js"></script>
+    <script>
+    $(function(){
+        const estadoActual = '{{ orden.estado }}';
+        const tieneBahia   = {{ orden.bahia|yesno:"true,false" }};
+        const esMecanico   = '{{ request.user.rol }}' === 'mecanico' && !{{ request.user.is_superuser|yesno:"true,false" }};
+
+        function cambiarEstado(nuevoEstado) {
+            // Bloquear al mecánico si no hay bahía asignada
+            if (esMecanico && !tieneBahia) return;
+            if (nuevoEstado === 'en_proceso' && ['en_proceso','finalizada','entregada','cancelada'].includes(estadoActual)) return;
+            if (nuevoEstado === 'finalizada' && estadoActual !== 'en_proceso') return;
+            $('#estado-orden').val(nuevoEstado);
+            $('#formEstadoOrden').submit();
+        }
+        $('#btnAbrirOrden').on('click', function(){ cambiarEstado('en_proceso'); });
+        $('#btnCerrarOrden').on('click', function(){ cambiarEstado('finalizada'); });
+        hotkeys('ctrl+enter', function(e){ e.preventDefault(); cambiarEstado('en_proceso'); });
+        hotkeys('f2',         function(e){ e.preventDefault(); cambiarEstado('finalizada'); });
+    });
+    </script>
+
+    {% endif %}
+</div>
+{% endblock %}

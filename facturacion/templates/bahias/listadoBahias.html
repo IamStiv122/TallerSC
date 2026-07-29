@@ -1,0 +1,242 @@
+{% extends "plantillaPrincipal.html" %}
+{% block contenido %}
+<center>
+    <br>
+    <h1><b>Bahías / Elevadores</b>
+        <a href="/bahias/nueva/" class="btn btn-info text-white"><i class="fa fa-plus"></i> Nueva Bahía</a>
+        <a href="/bahias/reporte/"
+           onclick="window.open(this.href,'Reporte de Bahías','width=900,height=700,resizable=yes,scrollbars=yes'); return false;"
+           class="btn btn-dark text-white">
+            <i class="fa fa-print"></i> Imprimir Bahías
+        </a>
+    </h1>
+</center>
+<br>
+
+<div class="container-fluid px-4">
+    <div class="row g-4">
+
+        <!-- ── Panel izquierdo: vehículos activos ──────────────────── -->
+        <div class="col-lg-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-semibold">
+                    <i class="fa fa-car text-primary me-2"></i>Vehículos activos
+                </div>
+                <div class="card-body p-3" id="panel-ordenes">
+                    {% for orden in ordenes %}
+                    <div class="orden-card card mb-2 border-primary shadow-sm ui-widget-content"
+                         data-orden-id="{{ orden.id }}"
+                         style="cursor:grab;">
+                        <div class="card-body py-2 px-3">
+                            <strong>{{ orden.vehiculo.placa }}</strong><br>
+                            <small class="text-muted">{{ orden.vehiculo.marca }} {{ orden.vehiculo.modelo }}</small><br>
+                            <span class="badge mt-1
+                                {% if orden.estado == 'pendiente' %}bg-warning text-dark
+                                {% elif orden.estado == 'en_proceso' %}bg-info text-dark
+                                {% elif orden.estado == 'finalizada' %}bg-success
+                                {% else %}bg-secondary{% endif %}">
+                                {{ orden.get_estado_display }}
+                            </span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted small mb-0">
+                        <i class="fa fa-check-circle text-success me-1"></i>
+                        No hay vehículos activos pendientes.
+                    </p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Panel derecho: plano de bahías ──────────────────────── -->
+        <div class="col-lg-9">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white fw-semibold">
+                    <i class="fa fa-th-large text-secondary me-2"></i>Distribución del taller
+                </div>
+                <div class="card-body p-3">
+                    <div id="plano-bahias"
+                         style="min-height:420px;
+                                background:linear-gradient(135deg,#f8f9fa,#eef4ff);
+                                position:relative;
+                                border-radius:8px;
+                                padding:12px;">
+                        {% for bahia in bahias %}
+                        <div class="bahia-card card shadow-sm ui-widget-content"
+                             data-bahia-id="{{ bahia.id }}"
+                             style="width:190px;
+                                    position:absolute;
+                                    left:{{ bahia.pos_x }}px;
+                                    top:{{ bahia.pos_y }}px;
+                                    cursor:move;
+                                    z-index:1;">
+                            <div class="card-body p-3">
+                                <span class="badge float-end
+                                    {% if bahia.estado == 'libre' %}bg-success
+                                    {% elif bahia.estado == 'ocupada' %}bg-danger
+                                    {% else %}bg-warning text-dark{% endif %}">
+                                    {{ bahia.get_estado_display }}
+                                </span>
+                                <h6 class="fw-bold mb-1">{{ bahia.nombre }}</h6>
+                                <small class="text-muted d-block mb-2">Nº {{ bahia.numero }}</small>
+                                <p class="small text-muted mb-3" style="font-size:.78rem; min-height:2em;">
+                                    {{ bahia.descripcion|default:'Sin descripción'|truncatechars:55 }}
+                                </p>
+                                <div class="d-flex gap-2">
+                                    <a href="/bahias/editar/{{ bahia.id }}/"
+                                       class="btn btn-outline-warning btn-sm">
+                                        <i class="fa fa-edit"></i>
+                                    </a>
+                                    <a href="/bahias/eliminar/{{ bahia.id }}/"
+                                       class="btn btn-outline-danger btn-sm"
+                                       onclick="event.preventDefault();
+                                                const l=this;
+                                                Swal.fire({title:'¿Eliminar bahía?',icon:'warning',
+                                                           showCancelButton:true,
+                                                           confirmButtonText:'Sí, eliminar',
+                                                           cancelButtonText:'Cancelar'})
+                                                .then(r=>{if(r.isConfirmed)window.location.href=l.href;});">
+                                        <i class="fa fa-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+.bahia-card { transition: box-shadow .2s; }
+.bahia-card:hover { box-shadow: 0 6px 18px rgba(0,0,0,.18) !important; }
+.bahia-card.ui-droppable-hover {
+    outline: 3px dashed #0d6efd !important;
+    background-color: #dbeafe !important;
+}
+</style>
+
+<script>
+$(function () {
+    const CSRF = '{{ csrf_token }}';
+
+    /* ── 1. Bahías: arrastrables dentro del plano, guardan posición ── */
+    $('.bahia-card').draggable({
+        containment: '#plano-bahias',
+        stack: '.bahia-card',
+        stop: function (event, ui) {
+            const id = $(this).data('bahia-id');
+            $.ajax({
+                url: '/bahias/posicion/' + id + '/',
+                type: 'POST',
+                headers: { 'X-CSRFToken': CSRF },
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    pos_x: Math.round(ui.position.left),
+                    pos_y: Math.round(ui.position.top)
+                })
+            });
+        }
+    });
+
+    /* ── 2. Órdenes: arrastrables con clon, vuelven si no sueltan ─── */
+    $('.orden-card').draggable({
+        helper: 'clone',
+        revert: 'invalid',
+        zIndex: 100,
+        start: function () { $(this).css('opacity', '0.6'); },
+        stop:  function () { $(this).css('opacity', '1'); }
+    });
+
+    /* ── 3. Bahías: también son droppables para recibir órdenes ───── */
+    $('.bahia-card').droppable({
+        accept: '.orden-card',
+        hoverClass: 'ui-droppable-hover',
+        drop: function (event, ui) {
+            const ordenId = ui.draggable.data('orden-id');
+            const bahiaId = $(this).data('bahia-id');
+            const bahiaNombre = $(this).find('h6').text().trim();
+
+            $.ajax({
+                url: '/bahias/orden/' + ordenId + '/' + bahiaId + '/',
+                type: 'POST',
+                headers: { 'X-CSRFToken': CSRF },
+                success: function (data) {
+                    if (data.ok) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Vehículo asignado',
+                            text: 'La orden fue asignada a ' + bahiaNombre,
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => location.reload());
+                    }
+                },
+                error: function () {
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo asignar la orden.' });
+                }
+            });
+        }
+    });
+
+    /* ── 4. Distribuir automáticamente las bahías que están en 0,0 ── */
+    (function reposicionarSuperpuestas() {
+        const cards = $('.bahia-card');
+        const cols  = 3;
+        const padX  = 10, padY = 10;
+        const gapX  = 210, gapY = 200;
+        const ocupadas = new Set();
+
+        // Primero registrar las ya posicionadas
+        cards.each(function () {
+            const x = parseInt($(this).css('left'));
+            const y = parseInt($(this).css('top'));
+            ocupadas.add(x + ',' + y);
+        });
+
+        // Detectar las que están superpuestas (mismo left/top que otra)
+        const posiciones = {};
+        cards.each(function () {
+            const x = parseInt($(this).css('left'));
+            const y = parseInt($(this).css('top'));
+            const key = x + ',' + y;
+            if (!posiciones[key]) posiciones[key] = [];
+            posiciones[key].push(this);
+        });
+
+        let col = 0, row = 0;
+        Object.values(posiciones).forEach(function (grupo) {
+            if (grupo.length > 1) {
+                // Varios en la misma posición: redistribuir todos
+                grupo.forEach(function (el) {
+                    let nx, ny;
+                    do {
+                        nx = padX + col * gapX;
+                        ny = padY + row * gapY;
+                        col++;
+                        if (col >= cols) { col = 0; row++; }
+                    } while (ocupadas.has(nx + ',' + ny));
+
+                    $(el).css({ left: nx + 'px', top: ny + 'px' });
+                    ocupadas.add(nx + ',' + ny);
+
+                    const id = $(el).data('bahia-id');
+                    $.ajax({
+                        url: '/bahias/posicion/' + id + '/',
+                        type: 'POST',
+                        headers: { 'X-CSRFToken': CSRF },
+                        contentType: 'application/json',
+                        data: JSON.stringify({ pos_x: nx, pos_y: ny })
+                    });
+                });
+            }
+        });
+    })();
+});
+</script>
+
+{% endblock %}

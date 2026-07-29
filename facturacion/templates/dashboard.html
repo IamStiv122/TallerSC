@@ -1,0 +1,207 @@
+{% extends "plantillaPrincipal.html" %}
+{% block contenido %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h2 class="mb-1">Dashboard del Taller</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-2">Bahías totales</h6>
+                            <h2 class="mb-0">{{ total_bahias }}</h2>
+                        </div>
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3 text-primary">
+                            <i class="fas fa-warehouse fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-2">Bahías libres</h6>
+                            <h2 class="mb-0">{{ bahias_libres }}</h2>
+                        </div>
+                        <div class="rounded-circle bg-success bg-opacity-10 p-3 text-success">
+                            <i class="fas fa-check-circle fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-2">Bahías ocupadas</h6>
+                            <h2 class="mb-0">{{ bahias_ocupadas }}</h2>
+                        </div>
+                        <div class="rounded-circle bg-warning bg-opacity-10 p-3 text-warning">
+                            <i class="fas fa-tools fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-2">Órdenes activas</h6>
+                            <h2 class="mb-0">{{ total_ordenes }}</h2>
+                        </div>
+                        <div class="rounded-circle bg-info bg-opacity-10 p-3 text-info">
+                            <i class="fas fa-clipboard-list fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">Órdenes por estado</h5>
+                </div>
+                <div class="card-body">
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="chartEstados"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">Estado de bahías</h5>
+                </div>
+                <div class="card-body">
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="chartBahias"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div> <!-- /container py-5 -->
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+
+{{ etiquetas_ordenes_json|json_script:"etiquetas-ordenes" }}
+{{ conteo_ordenes_json|json_script:"conteo-ordenes" }}
+{{ nombres_mec_json|json_script:"nombres-mecanicos" }}
+{{ ordenes_mec_json|json_script:"ordenes-mecanicos" }}
+{{ cerradas_mec_json|json_script:"cerradas-mecanicos" }}
+{{ bahias_estado_json|json_script:"bahias-estado" }}
+
+<script>
+    const etiquetasOrdenes  = JSON.parse(document.getElementById('etiquetas-ordenes').textContent);
+    const conteoOrdenes     = JSON.parse(document.getElementById('conteo-ordenes').textContent);
+    const nombresMecanicos  = JSON.parse(document.getElementById('nombres-mecanicos').textContent);
+    const ordenesMecanicos  = JSON.parse(document.getElementById('ordenes-mecanicos').textContent);
+    const cerradasMecanicos = JSON.parse(document.getElementById('cerradas-mecanicos').textContent);
+    
+    let bahiasEstado = null;
+    const bahiasEstadoEl = document.getElementById('bahias-estado');
+    if (bahiasEstadoEl) {
+        bahiasEstado = JSON.parse(bahiasEstadoEl.textContent);
+    }
+
+    if (etiquetasOrdenes.length > 0 && conteoOrdenes.length > 0) {
+        new Chart(document.getElementById('chartEstados'), {
+            type: 'bar',
+            data: {
+                labels: etiquetasOrdenes,
+                datasets: [{
+                    label: 'Órdenes',
+                    data: conteoOrdenes,
+                    backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#6c757d', '#20c997', '#dc3545'],
+                    borderRadius: 6
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+    } else {
+        document.getElementById('chartEstados').parentElement.innerHTML =
+            '<p class="text-muted text-center" style="padding-top:130px;">Sin datos</p>';
+    }
+
+    const chartMecEl = document.getElementById('chartMecanicos');
+    if (chartMecEl) {
+        if (nombresMecanicos.length > 0 && ordenesMecanicos.length > 0) {
+            new Chart(chartMecEl, {
+                type: 'bar',
+                data: {
+                    labels: nombresMecanicos,
+                    datasets: [
+                        { label: 'Órdenes asignadas', data: ordenesMecanicos,  backgroundColor: '#0d6efd' },
+                        { label: 'Órdenes cerradas',  data: cerradasMecanicos, backgroundColor: '#198754' }
+                    ]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'top' } } }
+            });
+        } else {
+            chartMecEl.parentElement.innerHTML =
+                '<p class="text-muted text-center" style="padding-top:130px;">Sin mecánicos registrados</p>';
+        }
+    }
+
+    const libres   = (bahiasEstado && bahiasEstado.libres   != null) ? Number(bahiasEstado.libres)   : 0;
+    const ocupadas = (bahiasEstado && bahiasEstado.ocupadas  != null) ? Number(bahiasEstado.ocupadas)  : 0;
+    const enEspera = (bahiasEstado && bahiasEstado.en_espera != null) ? Number(bahiasEstado.en_espera) : 0;
+    const totalBahias = libres + ocupadas + enEspera;
+
+    if (totalBahias > 0) {
+        new Chart(document.getElementById('chartBahias'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Libres', 'Ocupadas', 'En espera'],
+                datasets: [{
+                    data: [libres, ocupadas, enEspera],
+                    backgroundColor: ['#198754', '#dc3545', '#ffc107']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    } else {
+        document.getElementById('chartBahias').parentElement.innerHTML =
+            '<p class="text-muted text-center" style="padding-top:130px;">Sin bahías registradas</p>';
+    }
+
+    const driver    = window.driver.js.driver;
+    const driverObj = driver({
+        showProgress: true,
+        steps: [
+            { element: '#tourDashboard',  popover: { title: 'Guía rápida',       description: 'Este dashboard te muestra el estado general del taller.',            side: 'bottom', align: 'start' } },
+            { element: '#chartEstados',   popover: { title: 'Órdenes por estado', description: 'Revisa cuántas órdenes están abiertas, cerradas o en proceso.',       side: 'top',    align: 'start' } }
+        ]
+    });
+
+    document.getElementById('tourDashboard')?.addEventListener('click', function () {
+        driverObj.drive();
+    });
+</script>
+{% endblock %}

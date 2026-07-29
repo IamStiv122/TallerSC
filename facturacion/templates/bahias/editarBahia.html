@@ -1,0 +1,33 @@
+{% extends "plantillaPrincipal.html" %}
+{% block contenido %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+            <br>
+            <h1><b>Editar Bahía</b></h1>
+            <hr>
+            <form id="form_editar_bahia" action="/bahias/actualizar/" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="id" value="{{ bahia.id }}">
+                <b>Número:</b><br>
+                <input required class="form-control" type="number" name="numero" value="{{ bahia.numero }}"><br>
+                <b>Nombre:</b><br>
+                <input required class="form-control" type="text" name="nombre" value="{{ bahia.nombre }}"><br>
+                <b>Descripción:</b><br>
+                <textarea class="form-control" rows="3" name="descripcion">{{ bahia.descripcion }}</textarea><br>
+                <button class="btn btn-success" type="submit"><i class="fa fa-edit"></i> Actualizar</button>
+                <a href="/bahias/" class="btn btn-danger"><i class="fa fa-times"></i> Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+$(function(){
+    $('#form_editar_bahia').validate({
+        rules:{ numero:{required:true}, nombre:{required:true} },
+        messages:{ numero:{required:'Ingrese el número'}, nombre:{required:'Ingrese el nombre'} }
+    });
+});
+</script>
+{% endblock %}

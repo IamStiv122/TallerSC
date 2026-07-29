@@ -1,0 +1,123 @@
+{% extends "plantillaPrincipal.html" %}
+{% block contenido %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-6">
+                <br>
+                <h1><b>Registrar Nuevo Cliente</b></h1>
+                <hr>
+                <form enctype="multipart/form-data" id="form_nuevo_cliente" action="/clientes/guardar/" method="post">
+                    {% csrf_token %}
+                    <b>Cédula:</b> <br>
+                    <input required minlength="10" maxlength="10" placeholder="Ingrese la cédula del cliente" class="form-control" type="text" name="cedula">
+                    <br>
+                    <b>Nombre:</b> <br>
+                    <input required minlength="2" maxlength="100" placeholder="Ingrese el nombre del cliente" class="form-control" type="text" name="nombre">
+                    <br>
+                    <b>Apellido:</b> <br>
+                    <input required minlength="2" maxlength="100" placeholder="Ingrese el apellido del cliente" class="form-control" type="text" name="apellido">
+                    <br>
+                    <b>Teléfono:</b> <br>
+                    <input required maxlength="20" placeholder="Ingrese el teléfono del cliente" class="form-control" type="text" name="telefono">
+                    <br>
+                    <b>Email:</b> <br>
+                    <input placeholder="Ingrese el email del cliente (opcional)" class="form-control" type="email" name="email">
+                    <br>
+                    <b>Dirección:</b> <br>
+                    <textarea placeholder="Ingrese la dirección del cliente (opcional)" class="form-control" name="direccion" rows="2"></textarea>
+                    <br>
+
+                    <hr>
+                    <h5 class="text-primary"><i class="fa fa-user-lock me-1"></i> Acceso al sistema</h5>
+                    <small class="text-muted d-block mb-3">Estas credenciales le permiten al cliente iniciar sesión y ver el estado de sus órdenes.</small>
+
+                    <b>Usuario:</b> <br>
+                    <input required class="form-control" type="text" name="username" placeholder="Nombre de usuario para iniciar sesión" autocomplete="off">
+                    <br>
+                    <b>Contraseña:</b> <br>
+                    <input required minlength="6" class="form-control" type="password" name="password" id="id_password" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+                    <br>
+                    <b>Confirmar contraseña:</b> <br>
+                    <input required class="form-control" type="password" name="password2" placeholder="Repita la contraseña" autocomplete="new-password">
+                    <br>
+
+                    <button class="btn btn-success" type="submit">
+                        <i class="fa fa-save"></i>
+                        Guardar
+                    </button>
+                    <a href="/clientes/" class="btn btn-danger">
+                        <i class="fa fa-times"></i>
+                        Cancelar
+                    </a>
+                </form>
+                <br>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $.validator.addMethod("cedulaEcuatoriana", function (value) {
+        if (!/^\d{10}$/.test(value)) return false;
+        var provincia = parseInt(value.substring(0, 2), 10);
+        if (provincia < 1 || provincia > 24) return false;
+        if (/^(\d)\1{9}$/.test(value)) return false;
+        var coeficientes = [2, 1, 2, 1, 2, 1, 2, 1, 2];
+        var suma = 0;
+        for (var i = 0; i < 9; i++) {
+            var digito = parseInt(value[i], 10) * coeficientes[i];
+            if (digito >= 10) digito -= 9;
+            suma += digito;
+        }
+        var residuo     = suma % 10;
+        var verificador = residuo === 0 ? 0 : 10 - residuo;
+        return verificador === parseInt(value[9], 10);
+    }, "Ingrese una cédula ecuatoriana válida (provincia 01–24, dígito verificador correcto).");
+
+    $.validator.addMethod("telefonoCelularEc", function (value) {
+        if (!/^\d{10}$/.test(value))     return false;
+        if (!value.startsWith("09"))      return false;
+        if (/^09(\d)\1{7}$/.test(value)) return false;
+        return true;
+    }, "Ingrese un celular ecuatoriano válido (10 dígitos, inicia con 09).");
+
+    $.validator.addMethod("soloLetras", function (value) {
+        // Permite letras (incluye tildes, ñ), espacios y guiones. Rechaza dígitos.
+        return /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s\-]+$/.test(value);
+    }, "Este campo no puede contener números.");
+
+    $("#form_nuevo_cliente").validate({
+        rules: {
+            cedula:    { required: true, minlength: 10, maxlength: 10, cedulaEcuatoriana: true },
+            nombre:    { required: true, minlength: 2, soloLetras: true },
+            apellido:  { required: true, minlength: 2, soloLetras: true },
+            telefono:  { required: true, minlength: 10, maxlength: 10, telefonoCelularEc: true },
+            username:  { required: true, minlength: 3 },
+            password:  { required: true, minlength: 6 },
+            password2: { required: true, equalTo: '#id_password' }
+        },
+        messages: {
+            cedula: {
+                required:          "Ingrese la cédula",
+                minlength:         "La cédula debe tener exactamente 10 dígitos",
+                maxlength:         "La cédula debe tener exactamente 10 dígitos",
+                cedulaEcuatoriana: "Cédula inválida: verifique la provincia (01–24) y el dígito verificador."
+            },
+            nombre:   { required: "Ingrese el nombre",   minlength: "Mínimo 2 caracteres", soloLetras: "El nombre no puede contener números." },
+            apellido: { required: "Ingrese el apellido", minlength: "Mínimo 2 caracteres", soloLetras: "El apellido no puede contener números." },
+            telefono: {
+                required:          "Ingrese el teléfono",
+                minlength:         "El teléfono debe tener exactamente 10 dígitos",
+                maxlength:         "El teléfono debe tener exactamente 10 dígitos",
+                telefonoCelularEc: "Celular inválido: debe iniciar con 09 y no puede tener todos los dígitos iguales."
+            },
+            username:  { required: "Ingrese un nombre de usuario", minlength: "Mínimo 3 caracteres" },
+            password:  { required: "Ingrese una contraseña",       minlength: "Mínimo 6 caracteres" },
+            password2: { required: "Confirme la contraseña",       equalTo:   "Las contraseñas no coinciden" }
+        }
+    });
+</script>
+{% endblock %}

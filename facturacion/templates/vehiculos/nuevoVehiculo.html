@@ -1,0 +1,59 @@
+{% extends "plantillaPrincipal.html" %}
+{% block contenido %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+            <br>
+            <h1><b>Registrar Nuevo Vehículo</b></h1>
+            <hr>
+            <form id="form_nuevo_vehiculo" enctype="multipart/form-data" action="/vehiculos/guardar/" method="post">
+                {% csrf_token %}
+                <b>Cliente:</b><br>
+                <select required class="form-control" name="cliente">
+                    <option value="">Seleccione un cliente</option>
+                    {% for cliente in clientes %}
+                    <option value="{{ cliente.id }}">{{ cliente.nombre }} {{ cliente.apellido }} - {{ cliente.cedula }}</option>
+                    {% endfor %}
+                </select>
+                <br>
+                <b>Placa:</b><br>
+                <input required maxlength="10" class="form-control" type="text" name="placa" placeholder="Ej. ABC-1234">
+                <br>
+                <b>Marca:</b><br>
+                <input required class="form-control" type="text" name="marca">
+                <br>
+                <b>Modelo:</b><br>
+                <input required class="form-control" type="text" name="modelo">
+                <br>
+                <b>Año:</b><br>
+                <input required class="form-control" type="number" min="1900" max="2100" name="anio">
+                <br>
+                <b>Color:</b><br>
+                <input class="form-control" type="text" name="color">
+                <br>
+                <b>Tipo:</b><br>
+                <select class="form-control" name="tipo">
+                    <option value="sedan">Sedán</option>
+                    <option value="suv">SUV</option>
+                    <option value="pickup">Pick-up</option>
+                    <option value="hatchback">Hatchback</option>
+                    <option value="furgon">Furgón</option>
+                    <option value="otro">Otro</option>
+                </select>
+                <br>
+                <button class="btn btn-success" type="submit"><i class="fa fa-save"></i> Guardar</button>
+                <a href="/vehiculos/" class="btn btn-danger"><i class="fa fa-times"></i> Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+$(function(){
+    $('#form_nuevo_vehiculo').validate({
+        rules: { cliente:{required:true}, placa:{required:true}, marca:{required:true}, modelo:{required:true}, anio:{required:true} },
+        messages: { cliente:{required:'Seleccione un cliente'}, placa:{required:'Ingrese la placa'}, marca:{required:'Ingrese la marca'}, modelo:{required:'Ingrese el modelo'}, anio:{required:'Ingrese el año'} }
+    });
+});
+</script>
+{% endblock %}

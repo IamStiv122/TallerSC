@@ -1,0 +1,27 @@
+{% extends "plantillaPrincipal.html" %}
+{% block contenido %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+            <br>
+            <h1><b>Registrar Bahía</b></h1>
+            <hr>
+            <form id="form_nueva_bahia" action="/bahias/guardar/" method="post">
+                {% csrf_token %}
+                <b>Número:</b><br>
+                <input required class="form-control" type="number" name="numero"><br>
+                <b>Nombre:</b><br>
+                <input required class="form-control" type="text" name="nombre"><br>
+                <b>Descripción:</b><br>
+                <textarea class="form-control" rows="3" name="descripcion"></textarea><br>
+                <button class="btn btn-success" type="submit"><i class="fa fa-save"></i> Guardar</button>
+                <a href="/bahias/" class="btn btn-danger"><i class="fa fa-times"></i> Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+$(function(){ $('#form_nueva_bahia').validate({ rules:{ numero:{required:true}, nombre:{required:true} }, messages:{ numero:{required:'Ingrese el número'}, nombre:{required:'Ingrese el nombre'} } }); });
+</script>
+{% endblock %}

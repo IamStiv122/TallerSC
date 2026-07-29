@@ -1,0 +1,61 @@
+{% extends "plantillaPrincipal.html" %}
+{% block contenido %}
+<center>
+    <br> 
+    <h1>
+        <b>Listado de Mecánicos</b>
+        <a href="/mecanicos/nuevo/" class="btn btn-info text-white">
+            <i class="fa fa-plus"></i> Nuevo Mecánico
+        </a>
+        <a href="/mecanicos/reporte/" onclick="window.open(this.href, 'Reporte de Mecánicos', 'width=900,height=700, resizable=yes, scrollbars=yes'); return false;" class="btn btn-dark text-white">
+            <i class="fa fa-print"></i> Imprimir Mecánicos
+        </a>
+    </h1>
+</center>
+<br>
+
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8">
+        <table id="tbl_mecanicos" class="table table-striped table-hover table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>USUARIO</th>
+                    <th>NOMBRE</th>
+                    <th>ESPECIALIDAD</th>
+                    <th>ESTADO</th>
+                    <th>ACCIONES</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mecanico in mecanicos %}
+                <tr>
+                    <td>{{ mecanico.id }}</td>
+                    <td>{{ mecanico.usuario.username }}</td>
+                    <td>{{ mecanico.usuario.get_full_name|default:mecanico.usuario.username }}</td>
+                    <td>{{ mecanico.get_especialidad_display }}</td>
+                    <td>{% if mecanico.activo %}Activo{% else %}Inactivo{% endif %}</td>
+                    <td class="text-nowrap">
+                        <a href="/mecanicos/editar/{{ mecanico.id }}/" class="btn btn-outline-warning" title="Editar">
+                            <i class="fa fa-edit"></i>
+                        </a>
+                        <a href="/mecanicos/eliminar/{{ mecanico.id }}/" class="btn btn-outline-danger" title="Eliminar" onclick="event.preventDefault(); const link = this; Swal.fire({title:'¿Estás seguro de eliminar este mecánico?', text:'Se eliminará también el usuario asociado', icon:'warning', showCancelButton:true, confirmButtonText:'Sí, eliminar', cancelButtonText:'Cancelar'}).then((result)=>{if(result.isConfirmed){window.location.href=link.href;}});">
+                            <i class="fa fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+$(function(){
+    if ($.fn.DataTable) {
+        $('#tbl_mecanicos').DataTable({ dom: 'Bfrtip', buttons: ['copy','excel','pdf','print'] });
+    }
+});
+</script>
+{% endblock %}

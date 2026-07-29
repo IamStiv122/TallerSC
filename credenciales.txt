@@ -1,0 +1,18 @@
+Admin:
+stevenson
+123456
+
+
+Clientes:
+Juan Gavilanes
+123456
+
+Freddy García
+123456
+
+Mecanicos:
+Pedro Martinez
+123456
+
+Jose Vera
+123456

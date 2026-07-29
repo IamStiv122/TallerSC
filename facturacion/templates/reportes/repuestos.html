@@ -1,0 +1,281 @@
+{% extends "plantillaPrincipal.html" %}
+{% block contenido %}
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<div class="container-fluid py-5 px-4">
+
+    <!-- Encabezado -->
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1 d-inline-block ms-1">
+                <i class="fa fa-dollar-sign text-success me-2"></i>Margen de Repuestos
+            </h2>
+            <p class="text-muted mb-0 ms-1">Rentabilidad y estado de inventario</p>
+        </div>
+        <button onclick="window.print()" class="btn btn-outline-success">
+            <i class="fa fa-print me-1"></i> Imprimir
+        </button>
+    </div>
+
+    <!-- KPIs -->
+    <div class="row g-3 mb-5">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm text-center py-3">
+                <div class="card-body">
+                    <div class="display-6 fw-bold text-dark">{{ total_repuestos }}</div>
+                    <p class="text-muted mb-0 small mt-1">Repuestos registrados</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm text-center py-3">
+                <div class="card-body">
+                    <div class="display-6 fw-bold text-success">${{ ganancia_potencial }}</div>
+                    <p class="text-muted mb-0 small mt-1">Ganancia potencial</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm text-center py-3">
+                <div class="card-body">
+                    <div class="display-6 fw-bold text-primary">{{ margen_promedio }}%</div>
+                    <p class="text-muted mb-0 small mt-1">Margen promedio</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm text-center py-3">
+                <div class="card-body">
+                    <div class="display-6 fw-bold text-danger">{{ repuestos_criticos }}</div>
+                    <p class="text-muted mb-0 small mt-1">Stock crítico (≤ 3)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficas -->
+    <div class="row g-4 mb-5">
+
+        <!-- Gráfica: margen por repuesto -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pb-0 pt-3 px-4">
+                    <h6 class="fw-semibold mb-0">
+                        <i class="fa fa-chart-bar text-success me-2"></i>
+                        Margen de ganancia por repuesto (%)
+                    </h6>
+                </div>
+                <div class="card-body px-4 pb-4" style="height:310px;overflow:hidden;">
+                    <canvas id="graficaMargenes"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfica: Donut de stock -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pb-0 pt-3 px-4">
+                    <h6 class="fw-semibold mb-0">
+                        <i class="fa fa-boxes text-warning me-2"></i>
+                        Estado del stock
+                    </h6>
+                </div>
+                <div class="card-body px-4 pb-4 d-flex align-items-center justify-content-center"
+                     style="height:310px;">
+                    <canvas id="graficaStock"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Alertas de stock crítico -->
+    {% if criticos %}
+    <div class="alert alert-danger border-0 shadow-sm mb-4" role="alert">
+        <h6 class="fw-bold mb-2"><i class="fa fa-exclamation-triangle me-2"></i>Repuestos con stock crítico (≤ 3 unidades)</h6>
+        <div class="d-flex flex-wrap gap-2">
+            {% for r in criticos %}
+            <span class="badge bg-danger fs-6 px-3 py-2">
+                {{ r.nombre }} — stock: {{ r.stock }}
+            </span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Tabla detallada -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 pt-3 pb-0 px-4">
+            <h6 class="fw-semibold mb-0">
+                <i class="fa fa-table text-secondary me-2"></i>
+                Detalle de rentabilidad por repuesto
+            </h6>
+        </div>
+        <div class="card-body px-4 pb-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" id="tablaRepuestos">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Código</th>
+                            <th>Nombre</th>
+                            <th class="text-end">Costo</th>
+                            <th class="text-end">Venta</th>
+                            <th class="text-end">Ganancia unit.</th>
+                            <th class="text-center">Margen %</th>
+                            <th class="text-center">Stock</th>
+                            <th class="text-end">Ganancia potencial</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in repuestos %}
+                        <tr {% if r.stock <= 3 %}class="table-danger"{% endif %}>
+                            <td><code>{{ r.codigo }}</code></td>
+                            <td class="fw-semibold">{{ r.nombre }}</td>
+                            <td class="text-end">${{ r.precio_costo }}</td>
+                            <td class="text-end">${{ r.precio_venta }}</td>
+                            <td class="text-end text-success fw-semibold">
+                                ${{ r.ganancia_unitaria }}
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex align-items-center justify-content-center gap-2">
+                                    <div class="progress flex-grow-1" style="height:8px;max-width:70px;">
+                                        <div class="progress-bar
+                                            {% if r.margen_ganancia >= 30 %}bg-success
+                                            {% elif r.margen_ganancia >= 10 %}bg-warning
+                                            {% else %}bg-danger{% endif %}"
+                                            role="progressbar"
+                                            style="width:{{ r.margen_ganancia|floatformat:0 }}%;max-width:100%"
+                                            aria-valuenow="{{ r.margen_ganancia }}"
+                                            aria-valuemin="0" aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                    <span class="fw-bold
+                                        {% if r.margen_ganancia >= 30 %}text-success
+                                        {% elif r.margen_ganancia >= 10 %}text-warning
+                                        {% else %}text-danger{% endif %}">
+                                        {{ r.margen_ganancia }}%
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                {% if r.stock <= 3 %}
+                                    <span class="badge bg-danger">{{ r.stock }}</span>
+                                {% elif r.stock <= 10 %}
+                                    <span class="badge bg-warning text-dark">{{ r.stock }}</span>
+                                {% else %}
+                                    <span class="badge bg-success">{{ r.stock }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end fw-semibold text-success">
+                                ${{ r.ganancia_stock_total }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">
+                                <i class="fa fa-inbox fa-2x mb-2 d-block"></i>
+                                No hay repuestos registrados.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    {% if repuestos %}
+                    <tfoot class="table-secondary fw-bold">
+                        <tr>
+                            <td colspan="4">Totales</td>
+                            <td class="text-end">—</td>
+                            <td class="text-center">{{ margen_promedio }}%</td>
+                            <td class="text-center">—</td>
+                            <td class="text-end text-success">${{ ganancia_potencial }}</td>
+                        </tr>
+                    </tfoot>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const nombresR   = {{ nombres_json|safe }};
+const margenes   = {{ margenes_json|safe }};
+const stockOk    = {{ stock_ok }};
+const stockMed   = {{ stock_medio }};
+const stockBajo  = {{ stock_critico }};
+
+// Gráfica 1: Barras — margen por repuesto
+const ctx1 = document.getElementById('graficaMargenes').getContext('2d');
+new Chart(ctx1, {
+    type: 'bar',
+    data: {
+        labels: nombresR,
+        datasets: [{
+            label: 'Margen (%)',
+            data: margenes,
+            backgroundColor: margenes.map(v =>
+                v >= 30 ? 'rgba(25,135,84,0.75)' :
+                v >= 10 ? 'rgba(255,193,7,0.75)' :
+                          'rgba(220,53,69,0.75)'
+            ),
+            borderRadius: 4,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: { callback: v => v + '%' }
+            },
+            x: {
+                ticks: {
+                    maxRotation: 45,
+                    callback: function(val, idx) {
+                        const lbl = this.getLabelForValue(val);
+                        return lbl.length > 12 ? lbl.substring(0, 12) + '…' : lbl;
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Gráfica 2: Donut — estado stock
+const ctx2 = document.getElementById('graficaStock').getContext('2d');
+new Chart(ctx2, {
+    type: 'doughnut',
+    data: {
+        labels: ['Stock OK (> 10)', 'Stock medio (4-10)', 'Stock crítico (≤ 3)'],
+        datasets: [{
+            data: [stockOk, stockMed, stockBajo],
+            backgroundColor: [
+                'rgba(25,135,84,0.8)',
+                'rgba(255,193,7,0.8)',
+                'rgba(220,53,69,0.8)',
+            ],
+            hoverOffset: 8,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 12 } }
+        }
+    }
+});
+</script>
+
+<style>
+@media print {
+    nav, .btn, footer { display: none !important; }
+    .card { box-shadow: none !important; border: 1px solid #dee2e6 !important; }
+}
+</style>
+
+{% endblock %}

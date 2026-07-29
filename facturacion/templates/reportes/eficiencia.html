@@ -1,0 +1,266 @@
+{% extends "plantillaPrincipal.html" %}
+{% block contenido %}
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<div class="container-fluid py-5 px-4">
+
+    <!-- Encabezado -->
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1 d-inline-block ms-1">
+                <i class="fa fa-tachometer-alt text-primary me-2"></i>Eficiencia Operativa
+            </h2>
+            <p class="text-muted mb-0 ms-1">Desempeño por mecánico — rendimiento y tiempo de resolución</p>
+        </div>
+        <button onclick="window.print()" class="btn btn-outline-primary">
+            <i class="fa fa-print me-1"></i> Imprimir
+        </button>
+    </div>
+
+    <!-- KPIs rápidos -->
+    <div class="row g-3 mb-5">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm text-center py-3">
+                <div class="card-body">
+                    <div class="display-6 fw-bold text-primary">{{ total_mecanicos }}</div>
+                    <p class="text-muted mb-0 small mt-1">Mecánicos activos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm text-center py-3">
+                <div class="card-body">
+                    <div class="display-6 fw-bold text-dark">{{ total_ordenes_global }}</div>
+                    <p class="text-muted mb-0 small mt-1">Órdenes totales</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm text-center py-3">
+                <div class="card-body">
+                    <div class="display-6 fw-bold text-success">{{ total_finalizadas_global }}</div>
+                    <p class="text-muted mb-0 small mt-1">Finalizadas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm text-center py-3">
+                <div class="card-body">
+                    <div class="display-6 fw-bold text-info">{{ eficiencia_global }}%</div>
+                    <p class="text-muted mb-0 small mt-1">Eficiencia global</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficas -->
+    <div class="row g-4 mb-5">
+
+        <!-- Gráfica: Órdenes asignadas vs finalizadas -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pb-0 pt-3 px-4">
+                    <h6 class="fw-semibold mb-0">
+                        <i class="fa fa-chart-bar text-primary me-2"></i>
+                        Órdenes asignadas vs. finalizadas
+                    </h6>
+                </div>
+                <div class="card-body px-4 pb-4" style="height:300px;">
+                    <canvas id="graficaOrdenes"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfica: % Eficiencia por mecánico -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pb-0 pt-3 px-4">
+                    <h6 class="fw-semibold mb-0">
+                        <i class="fa fa-percent text-success me-2"></i>
+                        Porcentaje de eficiencia
+                    </h6>
+                </div>
+                <div class="card-body px-4 pb-4" style="height:300px;">
+                    <canvas id="graficaEficiencia"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Tabla detallada -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 pt-3 pb-0 px-4">
+            <h6 class="fw-semibold mb-0">
+                <i class="fa fa-table text-secondary me-2"></i>
+                Detalle por mecánico
+            </h6>
+        </div>
+        <div class="card-body px-4 pb-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" id="tablaMecanicos">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Mecánico</th>
+                            <th>Especialidad</th>
+                            <th class="text-center">Asignadas</th>
+                            <th class="text-center">En proceso</th>
+                            <th class="text-center">Finalizadas</th>
+                            <th class="text-center">Eficiencia</th>
+                            <th class="text-center">T. Promedio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in mecanicos %}
+                        <tr>
+                            <td>
+                                <span class="fw-semibold">{{ m.usuario.get_full_name|default:m.usuario.username }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary text-white">
+                                    {{ m.get_especialidad_display }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-primary text-white fs-6 px-3">
+                                    {{ m.total_ordenes }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-info text-white fs-6 px-3">
+                                    {{ m.en_proceso }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success text-white fs-6 px-3">
+                                    {{ m.ordenes_finalizadas }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                {% if m.total_ordenes > 0 %}
+                                    {% with pct=m.eficiencia_pct %}
+                                    <div class="d-flex align-items-center justify-content-center gap-2">
+                                        <div class="progress flex-grow-1" style="height:8px;max-width:80px;">
+                                            <div class="progress-bar
+                                                {% if pct >= 75 %}bg-success
+                                                {% elif pct >= 40 %}bg-warning
+                                                {% else %}bg-danger{% endif %}"
+                                                role="progressbar"
+                                                style="width:{{ pct }}%"
+                                                aria-valuenow="{{ pct }}"
+                                                aria-valuemin="0" aria-valuemax="100">
+                                            </div>
+                                        </div>
+                                        <span class="fw-bold
+                                            {% if pct >= 75 %}text-success
+                                            {% elif pct >= 40 %}text-warning
+                                            {% else %}text-danger{% endif %}">
+                                            {{ pct }}%
+                                        </span>
+                                    </div>
+                                    {% endwith %}
+                                {% else %}
+                                    <span class="text-muted small">Sin órdenes</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if m.tiempo_promedio_dias is not None %}
+                                    <span class="text-dark fw-semibold">{{ m.tiempo_promedio_dias }} días</span>
+                                {% else %}
+                                    <span class="text-muted small">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                <i class="fa fa-inbox fa-2x mb-2 d-block"></i>
+                                No hay mecánicos registrados.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const nombres    = {{ nombres_json|safe }};
+const asignadas  = {{ asignadas_json|safe }};
+const finalizadas= {{ finalizadas_json|safe }};
+const eficiencias= {{ eficiencias_json|safe }};
+
+// Gráfica 1: Barras agrupadas
+const ctx1 = document.getElementById('graficaOrdenes').getContext('2d');
+new Chart(ctx1, {
+    type: 'bar',
+    data: {
+        labels: nombres,
+        datasets: [
+            {
+                label: 'Asignadas',
+                data: asignadas,
+                backgroundColor: 'rgba(13,110,253,0.75)',
+                borderRadius: 5,
+            },
+            {
+                label: 'Finalizadas',
+                data: finalizadas,
+                backgroundColor: 'rgba(25,135,84,0.75)',
+                borderRadius: 5,
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' } },
+        scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1 } }
+        }
+    }
+});
+
+// Gráfica 2: Barra horizontal con % eficiencia
+const ctx2 = document.getElementById('graficaEficiencia').getContext('2d');
+new Chart(ctx2, {
+    type: 'bar',
+    data: {
+        labels: nombres,
+        datasets: [{
+            label: '% Eficiencia',
+            data: eficiencias,
+            backgroundColor: eficiencias.map(v =>
+                v >= 75 ? 'rgba(25,135,84,0.75)' :
+                v >= 40 ? 'rgba(255,193,7,0.75)' :
+                          'rgba(220,53,69,0.75)'
+            ),
+            borderRadius: 5,
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { beginAtZero: true, max: 100,
+                 ticks: { callback: v => v + '%' } }
+        }
+    }
+});
+</script>
+
+<style>
+@media print {
+    nav, .btn, footer { display: none !important; }
+    .card { box-shadow: none !important; border: 1px solid #dee2e6 !important; }
+}
+</style>
+
+{% endblock %}

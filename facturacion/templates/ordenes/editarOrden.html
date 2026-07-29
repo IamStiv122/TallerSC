@@ -1,0 +1,76 @@
+{% extends "plantillaPrincipal.html" %}
+{% block contenido %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+            <br>
+            <h1><b>Editar Orden de Trabajo</b></h1>
+            <hr>
+            <form id="form_editar_orden" action="/ordenes/actualizar/" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="id" value="{{ orden.id }}">
+                <b>Vehículo:</b><br>
+                <select required class="form-control" name="vehiculo">
+                    {% for vehiculo in vehiculos %}
+                    <option value="{{ vehiculo.id }}" {% if orden.vehiculo_id == vehiculo.id %}selected{% endif %}>{{ vehiculo.placa }} - {{ vehiculo.marca }} {{ vehiculo.modelo }}</option>
+                    {% endfor %}
+                </select><br>
+                <b>Mecánico:</b><br>
+                <select class="form-control" name="mecanico">
+                    <option value="">Sin asignar</option>
+                    {% for mecanico in mecanicos %}
+                    <option value="{{ mecanico.id }}" {% if orden.mecanico_id == mecanico.id %}selected{% endif %}>{{ mecanico.usuario.get_full_name|default:mecanico.usuario.username }}</option>
+                    {% endfor %}
+                </select><br>
+                <b>Descripción:</b><br>
+                <textarea required class="form-control" rows="4" name="descripcion">{{ orden.descripcion }}</textarea><br>
+                <b>Salida del auto <span style="font-weight:normal;">(estimada)</span>:</b><br>
+                <input id="id_fecha_entrega"
+                       class="form-control"
+                       type="text"
+                       name="fecha_estimada_entrega"
+                       placeholder="dd/mm/aaaa"
+                       value="{{ orden.fecha_estimada_entrega|date:'Y-m-d' }}"
+                       autocomplete="off">
+                <small class="text-muted d-block mt-1">Recuerda que el auto debe salir después de las 8:00 am y antes de las 6:00 pm.</small><br>
+                <b>Mano de obra:</b><br>
+                <input class="form-control" type="number" min="0" step="0.01" name="mano_obra" value="{{ orden.mano_obra }}"><br>
+                <button class="btn btn-success" type="submit"><i class="fa fa-edit"></i> Actualizar</button>
+                <a href="/ordenes/" class="btn btn-danger"><i class="fa fa-times"></i> Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+$(function(){
+    // Flatpickr — Salida del auto (estimada) — mín 1 día, máx 5 días desde hoy
+    var minSalida = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
+    var maxSalida = new Date(new Date().getTime() + 5 * 24 * 60 * 60 * 1000);
+    flatpickr("#id_fecha_entrega", {
+        locale: "es",
+        enableTime: false,
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d/m/Y",
+        minDate: minSalida,
+        maxDate: maxSalida,
+        onReady: function(selectedDates, dateStr, instance) {
+            instance.calendarContainer.classList.add("shadow");
+        }
+    });
+
+    // Validación jQuery
+    $('#form_editar_orden').validate({
+        rules:{
+            vehiculo:    { required: true },
+            descripcion: { required: true }
+        },
+        messages:{
+            vehiculo:    { required: 'Seleccione un vehículo' },
+            descripcion: { required: 'Ingrese una descripción' }
+        }
+    });
+});
+</script>
+{% endblock %}

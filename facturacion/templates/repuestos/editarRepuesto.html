@@ -1,0 +1,36 @@
+{% extends "plantillaPrincipal.html" %}
+{% block contenido %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+            <br>
+            <h1><b>Editar Repuesto</b></h1>
+            <hr>
+            <form id="form_editar_repuesto" action="/repuestos/actualizar/" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="id" value="{{ repuesto.id }}">
+                <b>Código:</b><br>
+                <input required class="form-control" type="text" name="codigo" value="{{ repuesto.codigo }}"><br>
+                <b>Nombre:</b><br>
+                <input required class="form-control" type="text" name="nombre" value="{{ repuesto.nombre }}"><br>
+                <b>Descripción:</b><br>
+                <textarea class="form-control" rows="3" name="descripcion">{{ repuesto.descripcion }}</textarea><br>
+                <b>Precio costo:</b><br>
+                <input required class="form-control" type="number" step="0.01" min="0" name="precio_costo" value="{{ repuesto.precio_costo }}"><br>
+                <b>Precio venta:</b><br>
+                <input required class="form-control" type="number" step="0.01" min="0" name="precio_venta" value="{{ repuesto.precio_venta }}"><br>
+                <b>Stock:</b><br>
+                <input class="form-control" type="number" min="0" name="stock" value="{{ repuesto.stock }}"><br>
+                <b>Unidad:</b><br>
+                <input class="form-control" type="text" name="unidad" value="{{ repuesto.unidad }}"><br>
+                <button class="btn btn-success" type="submit"><i class="fa fa-edit"></i> Actualizar</button>
+                <a href="/repuestos/" class="btn btn-danger"><i class="fa fa-times"></i> Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+$(function(){ $('#form_editar_repuesto').validate({ rules:{ codigo:{required:true}, nombre:{required:true}, precio_costo:{required:true}, precio_venta:{required:true} }, messages:{ codigo:{required:'Ingrese el código'}, nombre:{required:'Ingrese el nombre'}, precio_costo:{required:'Ingrese el costo'}, precio_venta:{required:'Ingrese el precio de venta'} } }); });
+</script>
+{% endblock %}

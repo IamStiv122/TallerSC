@@ -1,0 +1,90 @@
+{% extends "plantillaPrincipal.html" %}
+{% block contenido %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-6">
+                <br>
+                <h1><b>Actualizar Mecánico</b></h1>
+                <hr>
+                <form id="form_editar_mecanico" action="/mecanicos/actualizar/" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" value="{{ mecanico.id }}">
+
+                    <b>Usuario:</b> <br>
+                    <input required class="form-control" type="text" name="username" value="{{ mecanico.usuario.username }}">
+                    <br>
+                    <b>Contraseña:</b> <br>
+                    <input class="form-control" type="password" name="password" placeholder="Dejar vacío para conservar la actual">
+                    <br>
+                    <b>Nombre:</b> <br>
+                    <input required class="form-control" type="text" name="nombre" value="{{ mecanico.usuario.first_name }}">
+                    <br>
+                    <b>Apellido:</b> <br>
+                    <input required class="form-control" type="text" name="apellido" value="{{ mecanico.usuario.last_name }}">
+                    <br>
+                    <b>Email:</b> <br>
+                    <input class="form-control" type="email" name="email" value="{{ mecanico.usuario.email|default:'' }}">
+                    <br>
+                    <b>Teléfono:</b> <br>
+                    <input class="form-control" type="text" name="telefono" maxlength="10" value="{{ mecanico.usuario.telefono|default:'' }}">
+                    <br>
+                    <b>Especialidad:</b> <br>
+                    <select class="form-control" name="especialidad">
+                        {% for value,label in especialidades %}
+                        <option value="{{ value }}" {% if mecanico.especialidad == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <br>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" name="activo" {% if mecanico.activo %}checked{% endif %}>
+                        <label class="form-check-label">Activo</label>
+                    </div>
+
+                    <button class="btn btn-success" type="submit">
+                        <i class="fa fa-edit"></i>
+                        Actualizar
+                    </button>
+                    <a href="/mecanicos/" class="btn btn-danger">
+                        <i class="fa fa-times"></i>
+                        Cancelar
+                    </a>
+                </form>
+                <br>
+                <br>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $.validator.addMethod("telefonoCelularEc", function (value) {
+        if (!value) return true;
+        if (!/^\d{10}$/.test(value))     return false;
+        if (!value.startsWith("09"))      return false;
+        if (/^09(\d)\1{7}$/.test(value)) return false;
+        return true;
+    }, "Celular inválido: debe tener 10 dígitos, iniciar con 09 y no puede tener todos los dígitos iguales.");
+
+    $.validator.addMethod("soloLetras", function (value) {
+        return /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s\-]+$/.test(value);
+    }, "Este campo no puede contener números.");
+
+    $('#form_editar_mecanico').validate({
+        rules: {
+            username: { required: true },
+            nombre:   { required: true, soloLetras: true },
+            apellido: { required: true, soloLetras: true },
+            telefono: { telefonoCelularEc: true }
+        },
+        messages: {
+            username: { required: 'Ingrese el nombre de usuario' },
+            nombre:   { required: 'Ingrese el nombre del mecánico',   soloLetras: 'El nombre no puede contener números.' },
+            apellido: { required: 'Ingrese el apellido del mecánico', soloLetras: 'El apellido no puede contener números.' },
+            telefono: { telefonoCelularEc: 'Celular inválido: debe tener 10 dígitos, iniciar con 09 y no puede tener todos los dígitos iguales.' }
+        }
+    });
+</script>
+{% endblock %}

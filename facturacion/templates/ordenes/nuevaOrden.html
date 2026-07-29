@@ -1,0 +1,132 @@
+{% extends "plantillaPrincipal.html" %}
+{% block contenido %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+            <br>
+            <h1><b>Crear Nueva Orden de Trabajo</b></h1>
+            <hr>
+            <form id="form_nueva_orden" action="/ordenes/guardar/" method="post">
+                {% csrf_token %}
+                <b>Vehículo:</b><br>
+                <select required class="form-control" name="vehiculo">
+                    <option value="">Seleccione un vehículo</option>
+                    {% for vehiculo in vehiculos %}
+                    <option value="{{ vehiculo.id }}">{{ vehiculo.placa }} - {{ vehiculo.marca }} {{ vehiculo.modelo }} ({{ vehiculo.cliente.nombre }} {{ vehiculo.cliente.apellido }})</option>
+                    {% endfor %}
+                </select><br>
+                <b>Mecánico:</b><br>
+                <select class="form-control" name="mecanico">
+                    <option value="">Sin asignar</option>
+                    {% for mecanico in mecanicos %}
+                    <option value="{{ mecanico.id }}">{{ mecanico.usuario.get_full_name|default:mecanico.usuario.username }}</option>
+                    {% endfor %}
+                </select><br>
+                <b>Descripción del problema:</b><br>
+                <textarea required class="form-control" rows="4" name="descripcion"></textarea><br>
+                <b>Kilometraje de ingreso:</b><br>
+                <input class="form-control"
+                       type="number"
+                       min="0"
+                       step="1"
+                       inputmode="numeric"
+                       pattern="[0-9]*"
+                       name="kilometraje_ingreso"
+                       value="0">
+                <small class="text-muted d-block mt-1">Solo se permiten números enteros.</small><br>
+                <b>Ingreso del auto:</b><br>
+                <input required
+                       id="id_fecha_ingreso"
+                       class="form-control"
+                       type="text"
+                       name="fecha_ingreso"
+                       placeholder="dd/mm/aaaa"
+                       autocomplete="off">
+                <small class="text-muted d-block mt-1">Recuerda que el auto debe entrar después de las 8:00 am y antes de las 6:00 pm.</small><br>
+                <b>Salida del auto <span style="font-weight:normal;">(estimada)</span>:</b><br>
+                <input id="id_fecha_entrega"
+                       class="form-control"
+                       type="text"
+                       name="fecha_estimada_entrega"
+                       placeholder="dd/mm/aaaa"
+                       autocomplete="off">
+                <small class="text-muted d-block mt-1">Recuerda que el auto debe salir después de las 8:00 am y antes de las 6:00 pm.</small><br>
+                <b>Mano de obra:</b><br>
+                <input class="form-control" type="number" min="0" step="0.01" name="mano_obra" value="0"><br>
+                <div class="alert alert-info py-2 px-3 mb-3" style="font-size:0.92rem;">
+                    <i class="fa fa-info-circle me-1"></i>
+                    Al guardar pasarás directamente a la <strong>inspección inicial de 20 puntos</strong> — podrás usar la guía interactiva para completarla paso a paso.
+                </div>
+                <button class="btn btn-success" type="submit">
+                    <i class="fa fa-clipboard-check"></i> Guardar e ir a inspección
+                </button>
+                <a href="/ordenes/" class="btn btn-danger"><i class="fa fa-times"></i> Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+$(function(){
+    // Flatpickr — Ingreso del auto (solo fecha)
+    flatpickr("#id_fecha_ingreso", {
+        locale: "es",
+        enableTime: false,
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d/m/Y",
+        defaultDate: new Date(),
+        minDate: "today",
+        disable: [function(date) { return date.getDay() === 0; }],
+        onChange: function(selectedDates) {
+            if (selectedDates.length === 0) return;
+            var ingreso = selectedDates[0];
+            var minSalida = new Date(ingreso.getTime() + 24 * 60 * 60 * 1000);   // +1 día
+            var maxSalida = new Date(ingreso.getTime() + 5 * 24 * 60 * 60 * 1000); // +5 días
+            var fpEntrega = document.querySelector("#id_fecha_entrega")._flatpickr;
+            fpEntrega.set("minDate", minSalida);
+            fpEntrega.set("maxDate", maxSalida);
+            if (!fpEntrega.selectedDates.length ||
+                fpEntrega.selectedDates[0] < minSalida ||
+                fpEntrega.selectedDates[0] > maxSalida) {
+                fpEntrega.setDate(minSalida);
+            }
+        }
+    });
+
+    // Flatpickr — Salida del auto (estimada, solo fecha) — mín 1 día, máx 5 días desde hoy
+    var minSalidaInicial = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
+    var maxSalidaInicial = new Date(new Date().getTime() + 5 * 24 * 60 * 60 * 1000);
+    flatpickr("#id_fecha_entrega", {
+        locale: "es",
+        enableTime: false,
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d/m/Y",
+        minDate: minSalidaInicial,
+        maxDate: maxSalidaInicial,
+        disable: [function(date) { return date.getDay() === 0; }]
+    });
+
+    // Solo enteros en kilometraje
+    $('input[name="kilometraje_ingreso"]').on('input', function () {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+
+    // Validación jQuery
+    $('#form_nueva_orden').validate({
+        rules:{
+            vehiculo:     { required: true },
+            descripcion:  { required: true },
+            fecha_ingreso:{ required: true }
+        },
+        messages:{
+            vehiculo:     { required: 'Seleccione un vehículo' },
+            descripcion:  { required: 'Ingrese una descripción' },
+            fecha_ingreso:{ required: 'Seleccione la fecha de ingreso del auto' }
+        }
+    });
+});
+</script>
+{% endblock %}

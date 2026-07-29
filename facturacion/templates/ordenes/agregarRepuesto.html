@@ -1,0 +1,24 @@
+{% extends "plantillaPrincipal.html" %}
+{% block contenido %}
+<div class="container py-4">
+    <h1><b>Agregar Repuesto a la Orden</b></h1>
+    <p><b>Orden:</b> {{ orden.numero }} - {{ orden.vehiculo.placa }}</p>
+    <form action="/ordenes/{{ orden.id }}/repuesto/guardar/" method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label">Repuesto</label>
+            <select class="form-control" name="repuesto" required>
+                {% for repuesto in repuestos %}
+                <option value="{{ repuesto.id }}">{{ repuesto.codigo }} - {{ repuesto.nombre }} (Stock: {{ repuesto.stock }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Cantidad</label>
+            <input class="form-control" type="number" min="1" name="cantidad" value="1">
+        </div>
+        <button class="btn btn-success" type="submit"><i class="fa fa-save"></i> Agregar</button>
+        <a href="/ordenes/{{ orden.id }}/" class="btn btn-danger"><i class="fa fa-times"></i> Cancelar</a>
+    </form>
+</div>
+{% endblock %}

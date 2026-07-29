@@ -1,0 +1,314 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>CarServ — Taller Automotriz</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <!-- Favicon -->
+    <link href="{% static 'img/favicon.ico' %}" rel="icon">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700&family=Ubuntu:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries CSS -->
+    <link href="{% static 'lib/animate/animate.min.css' %}" rel="stylesheet">
+    <link href="{% static 'lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
+    <link href="{% static 'lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css' %}" rel="stylesheet">
+
+    <!-- Bootstrap -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.8/css/dataTables.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.2.3/css/buttons.dataTables.min.css">
+
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <!-- Flatpickr -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.min.css">
+
+    <!-- jQuery UI + Driver.js -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jqueryui@1.11.1/jquery-ui.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css">
+
+    <!-- Bootstrap FileInput -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/css/fileinput.min.css"
+          integrity="sha512-yDVMONIXJPPAoULZ92Ygngsn8ZUGB4ejm6fCc6q9ZvdH8blFAOgg75XZSEaAJ5m4E/yPI1BAi5fF2axMHVuZ5w=="
+          crossorigin="anonymous" referrerpolicy="no-referrer">
+</head>
+<body>
+
+    <!-- Spinner -->
+    <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-border text-primary" style="width:3rem;height:3rem;" role="status">
+            <span class="sr-only">Cargando...</span>
+        </div>
+    </div>
+
+    <!-- Topbar -->
+    <div class="container-fluid bg-light p-0">
+        <div class="row gx-0 d-none d-lg-flex">
+            <div class="col-lg-7 px-5 text-start">
+                <div class="h-100 d-inline-flex align-items-center py-3 me-4">
+                    <small class="fa fa-map-marker-alt text-primary me-2"></small>
+                    <small>Latacunga, Cotopaxi, Ecuador</small>
+                </div>
+                <div class="h-100 d-inline-flex align-items-center py-3">
+                    <small class="far fa-clock text-primary me-2"></small>
+                    <small>Lun - Vie : 08:00 AM - 06:00 PM</small>
+                </div>
+            </div>
+            <div class="col-lg-5 px-5 text-end">
+                <div class="h-100 d-inline-flex align-items-center py-3 me-4">
+                    <small class="fa fa-phone-alt text-primary me-2"></small>
+                    <small>+593 98 765 4321</small>
+                </div>
+                {% if request.user.is_authenticated %}
+                <div class="h-100 d-inline-flex align-items-center py-3">
+                    <small class="fa fa-user-circle text-primary me-2"></small>
+                    <small class="fw-bold">{{ request.user.get_full_name|default:request.user.username }}</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Navbar Start -->
+    <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
+        <a href="/" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
+            <h2 class="m-0 text-primary"><i class="fa fa-car me-3"></i>CarServ</h2>
+        </a>
+        <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <div class="navbar-nav ms-auto p-4 p-lg-0">
+
+                <a href="/" class="nav-item nav-link">Inicio</a>
+
+                {% if request.user.is_authenticated %}
+
+                    <!-- ADMIN o SUPERUSER -->
+                    {% if request.user.rol == 'admin' or request.user.is_superuser %}
+                    <a href="/dashboard/" class="nav-item nav-link">Dashboard</a>
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Personas</a>
+                        <div class="dropdown-menu fade-up m-0">
+                            <a href="/clientes/"  class="dropdown-item">Clientes</a>
+                            <a href="/mecanicos/" class="dropdown-item">Mecánicos</a>
+                        </div>
+                    </div>
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Gestión</a>
+                        <div class="dropdown-menu fade-up m-0">
+                            <a href="/vehiculos/" class="dropdown-item">Vehículos</a>
+                            <a href="/ordenes/"   class="dropdown-item">Órdenes de Trabajo</a>
+                            <a href="/bahias/"    class="dropdown-item">Bahías / Elevadores</a>
+                            <a href="/repuestos/" class="dropdown-item">Repuestos</a>
+                        </div>
+                    </div>
+                    <a href="/calendario/" class="nav-item nav-link">Calendario</a>
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                            <i></i>Reportes
+                        </a>
+                        <div class="dropdown-menu fade-up m-0">
+                            <div class="dropdown-divider"></div>
+                            <a href="/reportes/eficiencia/" class="dropdown-item">
+                                <i"></i>Eficiencia Operativa
+                            </a>
+                            <a href="/reportes/repuestos/" class="dropdown-item">
+                                <i></i>Margen de Repuestos
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- OFICINISTA -->
+                    {% elif request.user.rol == 'oficinista' %}
+                    <a href="/dashboard/" class="nav-item nav-link">Dashboard</a>
+                    <a href="/clientes/"   class="nav-item nav-link">Clientes</a>
+                    <a href="/vehiculos/"  class="nav-item nav-link">Vehículos</a>
+                    <a href="/ordenes/"    class="nav-item nav-link">Órdenes</a>
+                    <a href="/calendario/" class="nav-item nav-link">Calendario</a>
+
+                    <!-- MECÁNICO -->
+                    {% elif request.user.rol == 'mecanico' %}
+                    <a href="/ordenes/"    class="nav-item nav-link">Mis Órdenes</a>
+                    <a href="/calendario/" class="nav-item nav-link">Calendario</a>
+
+                    <!-- CLIENTE -->
+                    {% elif request.user.rol == 'cliente' %}
+                    <a href="/calendario/" class="nav-item nav-link">Calendario</a>
+                    <a href="/ordenes/"    class="nav-item nav-link">Mis Órdenes</a>
+                    {% endif %}
+
+                    <!-- Perfil + Cerrar sesión (todos los autenticados) -->
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="fa fa-user-circle me-1"></i>{{ request.user.get_full_name|default:request.user.username }}
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end fade-up m-0">
+                            <span class="dropdown-item-text text-muted small">
+                                <i class="fa fa-id-badge me-1"></i>{{ request.user.get_rol_display }}
+                            </span>
+                            <div class="dropdown-divider"></div>
+                            <a href="/logout/" class="dropdown-item text-danger">
+                                <i class="fa fa-sign-out-alt me-2"></i>Cerrar Sesión
+                            </a>
+                        </div>
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+            <!-- Botón Ingresar: solo si NO está autenticado -->
+            {% if not request.user.is_authenticated %}
+            <a href="/login/" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">
+                Ingresar<i class="fa fa-arrow-right ms-3"></i>
+            </a>
+            {% endif %}
+
+        </div>
+    </nav>
+    <!-- Navbar End -->
+
+    <!-- JS: jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
+    <!-- JS: Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- JS: DataTables -->
+    <script src="https://cdn.datatables.net/2.3.8/js/dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.3/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.3/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.3/js/buttons.print.min.js"></script>
+
+    {% block contenido %}
+    {% endblock %}
+
+    <!-- Footer -->
+    <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container py-5">
+            <div class="row g-5">
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-light mb-4">Dirección</h4>
+                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>Latacunga, Cotopaxi, Ecuador</p>
+                    <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+593 98 765 4321</p>
+                    <p class="mb-2"><i class="fa fa-envelope me-3"></i>carserv@taller.ec</p>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-light mb-4">Horario</h4>
+                    <h6 class="text-light">Lunes - Viernes:</h6>
+                    <p class="mb-4">08:00 AM - 06:00 PM</p>
+                    <h6 class="text-light">Sábado:</h6>
+                    <p class="mb-0">08:00 AM - 01:00 PM</p>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-light mb-4">CarServ</h4>
+                    <p>Sistema de Gestión para Talleres Mecánicos Automotrices</p>
+                    {% if not request.user.is_authenticated %}
+                    <a href="/login/" class="btn btn-primary btn-sm">Ingresar al Sistema</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="copyright">
+                <div class="row">
+                    <div class="col-md-12 text-center py-3">
+                        &copy; CarServ — Sistema de Gestión de Taller Automotriz
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+
+    <!-- JS: jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
+    <!-- JS: jQuery UI -->
+    <script src="https://cdn.jsdelivr.net/npm/jqueryui@1.11.1/jquery-ui.min.js"></script>
+    <!-- JS: Driver.js -->
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
+    <!-- JS: Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- JS: Librerías plantilla -->
+    <script src="{% static 'lib/wow/wow.min.js' %}"></script>
+    <script src="{% static 'lib/easing/easing.min.js' %}"></script>
+    <script src="{% static 'lib/waypoints/waypoints.min.js' %}"></script>
+    <script src="{% static 'lib/counterup/counterup.min.js' %}"></script>
+    <script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus/js/moment.min.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus/js/moment-timezone.min.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+    <!-- JS: Template principal -->
+    <script src="{% static 'js/main.js' %}"></script>
+    <!-- JS: DataTables -->
+    <script src="https://cdn.datatables.net/2.3.8/js/dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.3/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.3/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.3/js/buttons.print.min.js"></script>
+    <!-- JS: jQuery Validation -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <!-- JS: Bootstrap FileInput -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/js/fileinput.min.js"
+            integrity="sha512-0wQvB58Ha5coWmcgtg4f11CTSSxfrfLClUp9Vy0qhzYzCZDSnoB4Vhu5JXJFs7rU24LE6JsH+6hpP7vQ22lk5w=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="{% static 'lib/fileinput/theme.min.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.5.4/js/locales/es.min.js"
+            integrity="sha512-S0JIOaKT8nR01aG3SVwIeYYdf0+/0GgZz03j6WN0r9UYNtAgZOEntG5VRigldiFWY/ka6p6umMGmAE9DnDBgnQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- JS: QRCode -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.4.4/qrcode.min.js"
+            integrity="sha512-6x997BOv0e4O+G45Cwr4PZMYXP0ATChLcSob5IB6DPpXvDfRDMBFClXOg5ahmIVBoAf2tnsENpkHRJckceZiwQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- JS: SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- JS: Flatpickr -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+
+  {% if messages %}
+      {% for mensaje in messages %}
+      <script>
+        Swal.fire({
+          title: "CONFIRMACION",
+          icon: "success",
+          text: "{{ mensaje }}"
+        });
+        </script>
+      {% endfor %}
+  {% endif %}
+
+  {% block scripts %}{% endblock %}
+
+  <style>
+    label.error {
+        color: red;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+    input.error {
+        border-color: 1px solid red;
+    }
+  </style>
+</body>
+</html>

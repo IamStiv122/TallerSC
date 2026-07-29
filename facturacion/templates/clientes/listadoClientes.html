@@ -1,0 +1,81 @@
+{% extends "plantillaPrincipal.html" %}
+{% block contenido %}
+<center>
+    <br> 
+    <h1>
+        <b>Listado de Clientes</b>
+        <a href="/clientes/nuevo/" class="btn btn-info text-white">
+            <i class="fa fa-plus"></i> Nuevo Cliente
+        </a>
+        <a href="/reportes/clientes/" 
+            onclick="window.open(this.href, 'Reporte de Clientes', 'width=800,height=600, resizable=yes, scrollbars=yes'); return false;"
+            class="btn btn-dark text-white">
+            <i class="fa fa-print"></i> Imprimir Clientes
+        </a>
+    </h1>
+</center>
+<br>
+
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8">
+        <table id="tbl_clientes" class="table table-striped table-hover table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>CÉDULA</th>
+                    <th>NOMBRE</th>
+                    <th>APELLIDO</th>
+                    <th>TELÉFONO</th>
+                    <th>EMAIL</th>
+                    <th>ACCIONES</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cliente in clientes %}
+                <tr>
+                    <td>{{ cliente.id }}</td>
+                    <td>{{ cliente.cedula }}</td>
+                    <td>{{ cliente.nombre }}</td>
+                    <td>{{ cliente.apellido }}</td>
+                    <td>{{ cliente.telefono }}</td>
+                    <td>{{ cliente.email|default:"N/A" }}</td>
+                    <td class="text-nowrap">
+                        <a href="/clientes/editar/{{ cliente.id }}" class="btn btn-outline-warning" title="Editar">
+                            <i class="fa fa-edit"></i>
+                        </a>
+                        <a href="/clientes/eliminar/{{ cliente.id }}"
+                            class="btn btn-outline-danger"
+                            title="Eliminar"
+                            onclick="event.preventDefault();
+                            Swal.fire({
+                                title: '¿Estás seguro de eliminar este cliente?',
+                                text: 'No podrás revertir esta acción',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: 'Sí, eliminar',
+                                cancelButtonText: 'Cancelar'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = this.href;
+                                }
+                            });">
+                            <i class="fa fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+$(function(){
+    if ($.fn.DataTable) {
+        $('#tbl_clientes').DataTable({ dom: 'Bfrtip', buttons: ['copy','excel','pdf','print'] });
+    }
+});
+</script>
+
+{% endblock %}

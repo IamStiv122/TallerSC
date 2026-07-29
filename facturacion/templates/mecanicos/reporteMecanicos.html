@@ -1,0 +1,89 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<br>
+
+<center>
+    <table>
+        <tr>
+            <td style="text-align: left; width: 800px;">
+                <img style="height: 80px;" src="https://www.utc.edu.ec/Portals/0/BELEN/NUEVAimagen/universidad_def.png?ver=2019-05-08-101730-527" alt="">
+            </td>
+            <td>
+                <div id="qrcode"></div>
+            </td>
+            <td style="text-align: right; width: 800px;">
+                <img style="height: 80px;" src="https://scontent.fuio13-1.fna.fbcdn.net/v/t39.30808-6/245921403_111471174655359_3752814047428246322_n.jpg?stp=dst-jpg_tt6&cstp=mx1499x1499&ctp=s1499x1499&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=1cabvOG81MUQ7kNvwFTOBdJ&_nc_oc=AdpiCdHlm5J3FR37o4zhHfNLzFKO7klH445ySx7Zy0XELwvsSO_aKk8oC9cxIA6WzIQ&_nc_zt=23&_nc_ht=scontent.fuio13-1.fna&_nc_gid=oNu2Zl_lwiM-rVasM62FJA&_nc_ss=7b289&oh=00_Af9V61_52HA5DorKKzo_R-DswAr1q6e6VyqAywOE7MsnQg&oe=6A4328CA" alt="">
+            </td>
+        </tr>
+    </table>
+    <h1>LISTADO DE MECÁNICOS</h1>
+</center>
+<br>
+
+{% for m in mecanicos %}
+    <center>
+        <div>
+            <div style="width: 200px; float: left; padding-left: 20px !important;">
+                <div id="qrcode{{ m.id }}"></div>
+                <script type="text/javascript">
+                    var texto = "MECÁNICO: {{ m.usuario.get_full_name|escapejs }} \n USUARIO: {{ m.usuario.username|escapejs }} \n ESPECIALIDAD: {{ m.get_especialidad_display|escapejs }}";
+                    new QRCode(document.getElementById("qrcode{{ m.id }}"), {
+                        text: texto,
+                        width: 128,
+                        height: 128,
+                        colorDark: "#000",
+                        colorLight: "#ffffff",
+                    });
+                </script>
+            </div>
+            <div style="width: 50%; padding-left: 20px;">
+                <hr>
+                <h5 style="text-transform: uppercase;"><b>MECÁNICO #00{{ m.id }}</b></h5>
+                <hr>
+                <h5><b>NOMBRE: </b>{{ m.usuario.get_full_name|default:m.usuario.username }}</h5>
+                <hr>
+                <h5><b>USUARIO: </b>{{ m.usuario.username }}</h5>
+                <hr>
+                <h5><b>ESPECIALIDAD: </b>{{ m.get_especialidad_display }}</h5>
+                <hr>
+                <h5><b>ESTADO: </b>{% if m.activo %}Activo{% else %}Inactivo{% endif %}</h5>
+            </div>
+        </div>
+    </center>
+    <br>
+{% endfor %}
+
+<center>
+    <br><br>
+    ......................................... <br>
+    <b>FIRMA DE RESPONSABILIDAD</b> <br>
+    <b>C.I.:___________________</b> <br>
+    <b>RESPONSABLE DEL TALLER</b>
+</center>
+
+<center>
+    <br>
+    <button onclick="window.print();">Imprimir Reporte</button>
+</center>
+<br>
+
+<style media="print">
+    button { display: none; }
+</style>
+
+<script>
+    window.print();
+</script>
+
+<script type="text/javascript">
+    var urlActual = window.location.href;
+    new QRCode(document.getElementById("qrcode"), {
+        text: urlActual,
+        width: 128,
+        height: 128,
+        colorDark: "#00f",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
+</script>
