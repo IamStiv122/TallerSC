@@ -53,7 +53,7 @@ packaging==25.0
 perf==0.1
 pexpect==4.9.0
 pid==3.0.4
-pillow==11.3.0
+Pillow==11.3.0
 ply==3.11
 productmd==1.50
 psutil==7.0.0
