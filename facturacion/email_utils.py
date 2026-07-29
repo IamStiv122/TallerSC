@@ -1,6 +1,10 @@
-from django.core.mail import EmailMultiAlternatives
+import logging
+
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
 from django.utils.dateparse import parse_datetime
+
+logger = logging.getLogger(__name__)
 
 
 # ─── Paleta de colores ────────────────────────────────────────────────────────
@@ -317,7 +321,16 @@ def _enviar(asunto: str, texto_plano: str, html: str, destinatarios: list[str]) 
         to=destinatarios,
     )
     msg.attach_alternative(html, "text/html")
-    msg.send(fail_silently=False)
+    try:
+        msg.send(fail_silently=False)
+    except Exception as exc:
+        logger.error(
+            "Email send failed for %s to %s: %s",
+            asunto,
+            destinatarios,
+            exc,
+            exc_info=True,
+        )
 
 
 def enviar_notificaciones_orden(orden, evento: str = 'creada') -> None:
