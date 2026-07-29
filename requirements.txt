@@ -12,7 +12,6 @@ certifi==2025.7.9
 cffi==2.0.0
 charset-normalizer==3.4.3
 click==8.1.7
-cockpit @ file:///builddir/build/BUILD/cockpit-364-build/cockpit-364/tmp/wheel/cockpit-364-py3-none-any.whl#sha256=82c79404b2528627fced2a7ebf481b040ddae5fe359114bcfa0b986e85b0ed79
 crypt_r==3.13.1
 cryptography==49.0.0
 cssselect2==0.9.0
@@ -73,7 +72,6 @@ PyGObject==3.54.5
 pyHanko==0.35.2
 pyhanko-certvalidator==0.31.1
 pyinotify==0.9.6
-pykickstart @ file:///builddir/build/BUILD/pykickstart-3.66-build/pykickstart-3.66
 pyparted==3.13.0
 pypdf==6.14.2
 pyphen==0.17.2
@@ -99,8 +97,6 @@ requests-ftp==0.3.1
 rpds-py==0.27.0
 rpm==6.0.1
 scipy==1.18.0
-selinux @ file:///builddir/build/BUILD/libselinux-3.9-build/libselinux-3.9/src
-sepolicy @ file:///builddir/build/BUILD/policycoreutils-3.9-build/selinux-3.9/python/sepolicy
 setools==4.6.0
 setuptools==78.1.1
 simpleline==1.9.0
