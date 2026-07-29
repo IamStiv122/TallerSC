@@ -1,6 +1,9 @@
-from django.shortcuts import redirect, render, get_object_or_404
+import logging
+
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib import messages
+
+logger = logging.getLogger(__name__)
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
@@ -430,7 +433,10 @@ def guardarOrden(request):
         observacion  = 'Orden creada',
         cambiado_por = request.user,
     )
-    enviar_notificaciones_orden(orden, evento='creada')
+    try:
+        enviar_notificaciones_orden(orden, evento='creada')
+    except Exception as exc:
+        logger.error("Error enviando notificaciones para orden %s: %s", orden.numero, exc, exc_info=True)
     messages.success(request, f'Orden {numero} creada. Completa la inspección inicial del vehículo.')
     return redirect(f'/ordenes/{orden.id}/inspeccion/')
 
@@ -534,7 +540,10 @@ def cambiarEstadoOrden(request, id):
         cambiado_por    = request.user,
     )
     if nuevo_estado == 'finalizada':
-        enviar_notificaciones_orden(orden, evento='finalizada')
+        try:
+            enviar_notificaciones_orden(orden, evento='finalizada')
+        except Exception as exc:
+            logger.error("Error enviando notificaciones para orden %s: %s", orden.numero, exc, exc_info=True)
     messages.success(request, f'Estado actualizado a "{orden.get_estado_display()}".')
     return redirect(f'/ordenes/{id}/')
 
