@@ -408,14 +408,16 @@ def guardarOrden(request):
     from datetime import datetime, time as dtime
     from django.utils import timezone as tz
     def parsear_fecha(valor, hora_defecto=dtime(8, 0)):
-        """Convierte 'YYYY-MM-DD' a datetime aware con hora fija a las 08:00."""
+        """Convierte 'YYYY-MM-DD' o 'DD/MM/YYYY' a datetime aware con hora fija a las 08:00."""
         if not valor:
             return None
-        try:
-            dt_naive = datetime.combine(datetime.strptime(valor.strip(), '%Y-%m-%d').date(), hora_defecto)
-            return tz.make_aware(dt_naive)
-        except ValueError:
-            return None
+        for fmt in ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y'):
+            try:
+                dt_naive = datetime.combine(datetime.strptime(valor.strip(), fmt).date(), hora_defecto)
+                return tz.make_aware(dt_naive)
+            except ValueError:
+                continue
+        return None
 
     orden = OrdenTrabajo.objects.create(
         numero                 = numero,
@@ -496,11 +498,13 @@ def actualizarOrden(request):
     def parsear_fecha(valor, hora_defecto=dtime(8, 0)):
         if not valor:
             return None
-        try:
-            dt_naive = datetime.combine(datetime.strptime(valor.strip(), '%Y-%m-%d').date(), hora_defecto)
-            return tz.make_aware(dt_naive)
-        except ValueError:
-            return None
+        for fmt in ('%Y-%m-%d', '%d/%m/%Y', '%d/%m/%y'):
+            try:
+                dt_naive = datetime.combine(datetime.strptime(valor.strip(), fmt).date(), hora_defecto)
+                return tz.make_aware(dt_naive)
+            except ValueError:
+                continue
+        return None
     orden.fecha_estimada_entrega = parsear_fecha(request.POST.get('fecha_estimada_entrega'))
     orden.save()
     messages.success(request, 'Orden actualizada correctamente.')
