@@ -406,12 +406,14 @@ def guardarOrden(request):
     mecanico = get_object_or_404(Mecanico, id=mecanico_id) if mecanico_id else None
 
     from datetime import datetime, time as dtime
+    from django.utils import timezone as tz
     def parsear_fecha(valor, hora_defecto=dtime(8, 0)):
-        """Convierte 'YYYY-MM-DD' a datetime con hora fija a las 08:00."""
+        """Convierte 'YYYY-MM-DD' a datetime aware con hora fija a las 08:00."""
         if not valor:
             return None
         try:
-            return datetime.combine(datetime.strptime(valor.strip(), '%Y-%m-%d').date(), hora_defecto)
+            dt_naive = datetime.combine(datetime.strptime(valor.strip(), '%Y-%m-%d').date(), hora_defecto)
+            return tz.make_aware(dt_naive)
         except ValueError:
             return None
 
@@ -490,11 +492,13 @@ def actualizarOrden(request):
     orden.descripcion   = request.POST['descripcion']
     orden.mano_obra     = request.POST.get('mano_obra', 0)
     from datetime import datetime, time as dtime
+    from django.utils import timezone as tz
     def parsear_fecha(valor, hora_defecto=dtime(8, 0)):
         if not valor:
             return None
         try:
-            return datetime.combine(datetime.strptime(valor.strip(), '%Y-%m-%d').date(), hora_defecto)
+            dt_naive = datetime.combine(datetime.strptime(valor.strip(), '%Y-%m-%d').date(), hora_defecto)
+            return tz.make_aware(dt_naive)
         except ValueError:
             return None
     orden.fecha_estimada_entrega = parsear_fecha(request.POST.get('fecha_estimada_entrega'))
