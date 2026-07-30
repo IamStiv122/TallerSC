@@ -322,6 +322,9 @@ def _enviar(asunto: str, texto_plano: str, html: str, destinatarios: list[str]) 
     )
     msg.attach_alternative(html, "text/html")
     try:
+        connection = msg.get_connection()
+        connection.timeout = 10  # máximo 10 segundos para conectar
+        msg.connection = connection
         msg.send(fail_silently=False)
     except Exception as exc:
         logger.error(
