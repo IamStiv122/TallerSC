@@ -419,6 +419,20 @@ def guardarOrden(request):
                 continue
         return None
 
+    # Verificar que el vehículo no tenga ya una orden activa en el taller
+    orden_activa = OrdenTrabajo.objects.filter(
+        vehiculo=vehiculo,
+        estado__in=('pendiente', 'en_proceso', 'pausada')
+    ).first()
+    if orden_activa:
+        messages.error(
+            request,
+            f'El vehículo {vehiculo.placa} ya tiene una orden activa en el taller '
+            f'(N° {orden_activa.numero} – estado: {orden_activa.get_estado_display()}). '
+            f'Finaliza o cancela esa orden antes de crear una nueva.'
+        )
+        return redirect('/ordenes/nueva/')
+
     orden = OrdenTrabajo.objects.create(
         numero                 = numero,
         vehiculo               = vehiculo,
