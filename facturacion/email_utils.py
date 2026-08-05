@@ -1,7 +1,7 @@
 import logging
 
+import requests
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
 from django.utils.dateparse import parse_datetime
 
 logger = logging.getLogger(__name__)
@@ -310,30 +310,104 @@ def _html_finalizada_mecanico(orden) -> str:
 # FUNCIÓN PRINCIPAL
 # ═══════════════════════════════════════════════════════════════════════════════
 
-def _enviar(asunto: str, texto_plano: str, html: str, destinatarios: list[str]) -> None:
-    """Envía un correo con fallback texto-plano + HTML enriquecido."""
-    if not destinatarios:
-        return
-    msg = EmailMultiAlternatives(
-        subject=asunto,
-        body=texto_plano,
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        to=destinatarios,
-    )
-    msg.attach_alternative(html, "text/html")
-    try:
-        connection = msg.get_connection()
-        connection.timeout = 10  # máximo 10 segundos para conectar
-        msg.connection = connection
-        msg.send(fail_silently=False)
-    except Exception as exc:
-        logger.error(
-            "Email send failed for %s to %s: %s",
+def _enviar(
+    asunto: str,
+    texto_plano: str,
+    html: str,
+    destinatarios: list[str],
+) -> None:
+    """Envía un correo mediante la API HTTPS de Brevo."""
+
+    destinatarios_limpios = [
+        correo.strip()
+        for correo in destinatarios
+        if correo and correo.strip()
+    ]
+
+    if not destinatarios_limpios:
+        logger.warning(
+            "No se envió el correo '%s': no hay destinatarios válidos.",
             asunto,
-            destinatarios,
+        )
+        return
+
+    api_key = getattr(settings, "BREVO_API_KEY", "").strip()
+    sender_email = getattr(settings, "BREVO_SENDER_EMAIL", "").strip()
+    sender_name = getattr(
+        settings,
+        "BREVO_SENDER_NAME",
+        "CarServ Taller",
+    ).strip()
+
+    if not api_key:
+        raise RuntimeError(
+            "No está configurada la variable BREVO_API_KEY."
+        )
+
+    if not sender_email:
+        raise RuntimeError(
+            "No está configurada la variable BREVO_SENDER_EMAIL."
+        )
+
+    payload = {
+        "sender": {
+            "name": sender_name,
+            "email": sender_email,
+        },
+        "to": [
+            {"email": correo}
+            for correo in destinatarios_limpios
+        ],
+        "subject": asunto,
+        "textContent": texto_plano,
+        "htmlContent": html,
+    }
+
+    try:
+        response = requests.post(
+            "https://api.brevo.com/v3/smtp/email",
+            headers={
+                "accept": "application/json",
+                "api-key": api_key,
+                "content-type": "application/json",
+            },
+            json=payload,
+            timeout=30,
+        )
+
+        response.raise_for_status()
+
+        datos = response.json()
+
+        logger.info(
+            "Correo enviado correctamente: asunto=%s, "
+            "destinatarios=%s, messageId=%s",
+            asunto,
+            destinatarios_limpios,
+            datos.get("messageId", "sin messageId"),
+        )
+
+    except requests.HTTPError as exc:
+        logger.error(
+            "Brevo rechazó el correo '%s' para %s. "
+            "HTTP %s. Respuesta: %s",
+            asunto,
+            destinatarios_limpios,
+            response.status_code,
+            response.text,
+            exc_info=True,
+        )
+        raise
+
+    except requests.RequestException as exc:
+        logger.error(
+            "No se pudo conectar con Brevo para enviar '%s' a %s: %s",
+            asunto,
+            destinatarios_limpios,
             exc,
             exc_info=True,
         )
+        raise
 
 
 def enviar_notificaciones_orden(orden, evento: str = 'creada') -> None:

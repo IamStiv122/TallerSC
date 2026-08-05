@@ -178,6 +178,18 @@ DEFAULT_FROM_EMAIL = os.getenv(
 
 EMAIL_TIMEOUT = 30
 
+BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
+
+BREVO_SENDER_EMAIL = os.getenv(
+    "BREVO_SENDER_EMAIL",
+    "",
+)
+
+BREVO_SENDER_NAME = os.getenv(
+    "BREVO_SENDER_NAME",
+    "CarServ Taller",
+)
+
 # MOstrar errores de envio de correo
 LOGGING = {
     'version': 1,
