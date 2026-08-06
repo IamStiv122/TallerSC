@@ -98,74 +98,62 @@
                 Detalle por mecánico
             </h6>
         </div>
-        <div class="card-body px-4 pb-4">
+        <div class="card-body px-2 px-md-4 pb-4">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0" id="tablaMecanicos">
                     <thead class="table-dark">
                         <tr>
-                            <th>Mecánico</th>
-                            <th>Especialidad</th>
-                            <th class="text-center">Asignadas</th>
-                            <th class="text-center">En proceso</th>
-                            <th class="text-center">Finalizadas</th>
-                            <th class="text-center">Eficiencia</th>
-                            <th class="text-center">T. Promedio</th>
+                            <th class="text-nowrap">Mecánico</th>
+                            <th class="text-nowrap">Especialidad</th>
+                            <th class="text-center text-nowrap">Asignadas</th>
+                            <th class="text-center text-nowrap">En proceso</th>
+                            <th class="text-center text-nowrap">Finalizadas</th>
+                            <th class="text-center text-nowrap">Eficiencia</th>
+                            <th class="text-center text-nowrap">T. Promedio</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for m in mecanicos %}
                         <tr>
-                            <td>
-                                <span class="fw-semibold">{{ m.usuario.get_full_name|default:m.usuario.username }}</span>
+                            <td class="text-nowrap fw-semibold">{{ m.usuario.get_full_name|default:m.usuario.username }}</td>
+                            <td class="text-nowrap">
+                                <span class="badge bg-secondary">{{ m.get_especialidad_display }}</span>
                             </td>
-                            <td>
-                                <span class="badge bg-secondary text-white">
-                                    {{ m.get_especialidad_display }}
-                                </span>
+                            <td class="text-center text-nowrap">
+                                <span class="badge bg-primary fs-6 px-3">{{ m.total_ordenes }}</span>
                             </td>
-                            <td class="text-center">
-                                <span class="badge bg-primary text-white fs-6 px-3">
-                                    {{ m.total_ordenes }}
-                                </span>
+                            <td class="text-center text-nowrap">
+                                <span class="badge bg-info fs-6 px-3">{{ m.en_proceso }}</span>
                             </td>
-                            <td class="text-center">
-                                <span class="badge bg-info text-white fs-6 px-3">
-                                    {{ m.en_proceso }}
-                                </span>
+                            <td class="text-center text-nowrap">
+                                <span class="badge bg-success fs-6 px-3">{{ m.ordenes_finalizadas }}</span>
                             </td>
-                            <td class="text-center">
-                                <span class="badge bg-success text-white fs-6 px-3">
-                                    {{ m.ordenes_finalizadas }}
-                                </span>
-                            </td>
-                            <td class="text-center">
+                            <td class="text-center text-nowrap">
                                 {% if m.total_ordenes > 0 %}
                                     {% with pct=m.eficiencia_pct %}
-                                    <div class="d-flex align-items-center justify-content-center gap-2">
-                                        <div class="progress flex-grow-1" style="height:8px;max-width:80px;">
-                                            <div class="progress-bar
-                                                {% if pct >= 75 %}bg-success
-                                                {% elif pct >= 40 %}bg-warning
-                                                {% else %}bg-danger{% endif %}"
-                                                role="progressbar"
-                                                style="width:{{ pct }}%"
-                                                aria-valuenow="{{ pct }}"
-                                                aria-valuemin="0" aria-valuemax="100">
-                                            </div>
+                                    <span class="fw-bold
+                                        {% if pct >= 75 %}text-success
+                                        {% elif pct >= 40 %}text-warning
+                                        {% else %}text-danger{% endif %}">
+                                        {{ pct }}%
+                                    </span>
+                                    <div class="progress mt-1" style="height:5px;min-width:70px;">
+                                        <div class="progress-bar
+                                            {% if pct >= 75 %}bg-success
+                                            {% elif pct >= 40 %}bg-warning
+                                            {% else %}bg-danger{% endif %}"
+                                            role="progressbar"
+                                            style="width:{{ pct }}%"
+                                            aria-valuenow="{{ pct }}"
+                                            aria-valuemin="0" aria-valuemax="100">
                                         </div>
-                                        <span class="fw-bold
-                                            {% if pct >= 75 %}text-success
-                                            {% elif pct >= 40 %}text-warning
-                                            {% else %}text-danger{% endif %}">
-                                            {{ pct }}%
-                                        </span>
                                     </div>
                                     {% endwith %}
                                 {% else %}
                                     <span class="text-muted small">Sin órdenes</span>
                                 {% endif %}
                             </td>
-                            <td class="text-center">
+                            <td class="text-center text-nowrap">
                                 {% if m.tiempo_promedio_dias is not None %}
                                     <span class="text-dark fw-semibold">{{ m.tiempo_promedio_dias }} días</span>
                                 {% else %}
@@ -263,4 +251,22 @@ new Chart(ctx2, {
 }
 </style>
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(function(){
+    if ($.fn.DataTable && $('#tablaMecanicos tbody tr').length > 1) {
+        $('#tablaMecanicos').DataTable({
+            responsive: false,
+            scrollX: true,
+            paging: false,
+            searching: false,
+            info: false,
+            dom: 't',
+            columnDefs: [{ targets: '_all', className: 'text-nowrap' }]
+        });
+    }
+});
+</script>
 {% endblock %}

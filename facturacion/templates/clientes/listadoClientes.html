@@ -72,10 +72,15 @@
 $(function(){
     if ($.fn.DataTable) {
         $('#tbl_clientes').DataTable({
-            responsive: true,
-            dom: '<"row"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>>rtip',
+            responsive: false,
+            scrollX: true,
+            dom: '<"row mb-2"<"col-12 col-md-6"B><"col-12 col-md-6"f>>rtip',
             buttons: ['copy', 'excel', 'pdf', 'print'],
-            language: { url: '//cdn.datatables.net/plug-ins/2.3.8/i18n/es-ES.json' }
+            language: { url: '//cdn.datatables.net/plug-ins/2.3.8/i18n/es-ES.json' },
+            columnDefs: [
+                { targets: '_all', className: 'text-nowrap' },
+                { targets: -1, className: 'text-nowrap text-center' }
+            ]
         });
     }
 });

@@ -325,13 +325,7 @@
     -webkit-overflow-scrolling: touch;
 }
 
-@media (max-width: 767.98px) {
-    .table-responsive .table th,
-    .table-responsive .table td {
-        white-space: normal !important;
-        word-break: break-word !important;
-    }
-}
+/* IMPORTANTE: NO forzar word-break en tablas con scrollX — dejar que el nowrap funcione */
 
 
 .testimonial-carousel .owl-dot.active {
@@ -437,27 +431,6 @@
         font-size: 0.8rem;
     }
 
-    /* Tablas DataTables */
-    .dataTables_wrapper .dt-buttons {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 4px;
-        margin-bottom: 8px;
-    }
-    .dataTables_wrapper .dt-buttons .dt-button {
-        font-size: 0.78rem;
-        padding: 4px 8px;
-    }
-    .dataTables_wrapper .dataTables_filter label {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 0.85rem;
-    }
-    .dataTables_wrapper .dataTables_filter input {
-        width: 140px;
-    }
-
     /* Cards del dashboard */
     .card-body h2 {
         font-size: 1.8rem;
@@ -479,36 +452,74 @@
         font-size: 0.75rem;
     }
 
-    /* Footer */
-    .footer .col-lg-3 {
-        margin-bottom: 1rem;
-    }
-
     /* Página de inicio — sección de servicios */
     .service .nav-link h4 {
         font-size: 0.95rem;
     }
 }
 
-/* Tablas con scroll horizontal en todos los tamaños pequeños */
-@media (max-width: 767.98px) {
-    .table-responsive {
-        border: 0;
-    }
+/*** DataTables con scrollX — estilos globales ***/
 
-    /* DataTables: información y paginación centradas */
+/* Contenedor scroll no desborda la pantalla */
+.dataTables_wrapper {
+    width: 100%;
+    overflow: hidden;
+}
+.dataTables_scroll {
+    overflow: hidden;
+}
+.dataTables_scrollBody {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Botones Copy/Excel/PDF/Print en móvil */
+@media (max-width: 767.98px) {
+    .dataTables_wrapper .dt-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-bottom: 8px;
+    }
+    .dataTables_wrapper .dt-buttons .dt-button {
+        font-size: 0.78rem;
+        padding: 4px 8px;
+    }
+    .dataTables_wrapper .dataTables_filter {
+        text-align: left !important;
+    }
+    .dataTables_wrapper .dataTables_filter label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.85rem;
+        width: 100%;
+    }
+    .dataTables_wrapper .dataTables_filter input {
+        flex: 1;
+        min-width: 0;
+    }
     .dataTables_wrapper .dataTables_info,
     .dataTables_wrapper .dataTables_paginate {
         text-align: center;
         margin-top: 8px;
-    }
-    .dataTables_wrapper .dataTables_paginate .paginate_button {
-        padding: 4px 8px;
         font-size: 0.85rem;
     }
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        padding: 4px 8px !important;
+        font-size: 0.82rem !important;
+    }
 
-    /* Expandir columna de acciones en responsive */
-    td.text-nowrap {
-        white-space: nowrap;
+    /* Encabezado de tabla no desborda */
+    .row.mb-2 {
+        flex-direction: column;
+    }
+    .row.mb-2 > [class*="col-"] {
+        width: 100%;
+    }
+
+    /* table-responsive sin borde extra */
+    .table-responsive {
+        border: 0;
     }
 }

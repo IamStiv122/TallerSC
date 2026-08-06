@@ -113,53 +113,51 @@
                 Detalle de rentabilidad por repuesto
             </h6>
         </div>
-        <div class="card-body px-4 pb-4">
+        <div class="card-body px-2 px-md-4 pb-4">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0" id="tablaRepuestos">
                     <thead class="table-dark">
                         <tr>
-                            <th>Código</th>
-                            <th>Nombre</th>
-                            <th class="text-end">Costo</th>
-                            <th class="text-end">Venta</th>
-                            <th class="text-end">Ganancia unit.</th>
-                            <th class="text-center">Margen %</th>
-                            <th class="text-center">Stock</th>
-                            <th class="text-end">Ganancia potencial</th>
+                            <th class="text-nowrap">Código</th>
+                            <th class="text-nowrap">Nombre</th>
+                            <th class="text-end text-nowrap">Costo</th>
+                            <th class="text-end text-nowrap">Venta</th>
+                            <th class="text-end text-nowrap">Gan. unit.</th>
+                            <th class="text-center text-nowrap">Margen %</th>
+                            <th class="text-center text-nowrap">Stock</th>
+                            <th class="text-end text-nowrap">Gan. total</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for r in repuestos %}
                         <tr {% if r.stock <= 3 %}class="table-danger"{% endif %}>
-                            <td><code>{{ r.codigo }}</code></td>
-                            <td class="fw-semibold">{{ r.nombre }}</td>
-                            <td class="text-end">${{ r.precio_costo }}</td>
-                            <td class="text-end">${{ r.precio_venta }}</td>
-                            <td class="text-end text-success fw-semibold">
+                            <td class="text-nowrap"><code>{{ r.codigo }}</code></td>
+                            <td class="text-nowrap fw-semibold">{{ r.nombre }}</td>
+                            <td class="text-end text-nowrap">${{ r.precio_costo }}</td>
+                            <td class="text-end text-nowrap">${{ r.precio_venta }}</td>
+                            <td class="text-end text-nowrap text-success fw-semibold">
                                 ${{ r.ganancia_unitaria }}
                             </td>
-                            <td class="text-center">
-                                <div class="d-flex align-items-center justify-content-center gap-2">
-                                    <div class="progress flex-grow-1" style="height:8px;max-width:70px;">
-                                        <div class="progress-bar
-                                            {% if r.margen_ganancia >= 30 %}bg-success
-                                            {% elif r.margen_ganancia >= 10 %}bg-warning
-                                            {% else %}bg-danger{% endif %}"
-                                            role="progressbar"
-                                            style="width:{{ r.margen_ganancia|floatformat:0 }}%;max-width:100%"
-                                            aria-valuenow="{{ r.margen_ganancia }}"
-                                            aria-valuemin="0" aria-valuemax="100">
-                                        </div>
+                            <td class="text-center text-nowrap">
+                                <span class="fw-bold
+                                    {% if r.margen_ganancia >= 30 %}text-success
+                                    {% elif r.margen_ganancia >= 10 %}text-warning
+                                    {% else %}text-danger{% endif %}">
+                                    {{ r.margen_ganancia }}%
+                                </span>
+                                <div class="progress mt-1" style="height:5px;min-width:60px;">
+                                    <div class="progress-bar
+                                        {% if r.margen_ganancia >= 30 %}bg-success
+                                        {% elif r.margen_ganancia >= 10 %}bg-warning
+                                        {% else %}bg-danger{% endif %}"
+                                        role="progressbar"
+                                        style="width:{{ r.margen_ganancia|floatformat:0 }}%;max-width:100%"
+                                        aria-valuenow="{{ r.margen_ganancia }}"
+                                        aria-valuemin="0" aria-valuemax="100">
                                     </div>
-                                    <span class="fw-bold
-                                        {% if r.margen_ganancia >= 30 %}text-success
-                                        {% elif r.margen_ganancia >= 10 %}text-warning
-                                        {% else %}text-danger{% endif %}">
-                                        {{ r.margen_ganancia }}%
-                                    </span>
                                 </div>
                             </td>
-                            <td class="text-center">
+                            <td class="text-center text-nowrap">
                                 {% if r.stock <= 3 %}
                                     <span class="badge bg-danger">{{ r.stock }}</span>
                                 {% elif r.stock <= 10 %}
@@ -168,7 +166,7 @@
                                     <span class="badge bg-success">{{ r.stock }}</span>
                                 {% endif %}
                             </td>
-                            <td class="text-end fw-semibold text-success">
+                            <td class="text-end text-nowrap fw-semibold text-success">
                                 ${{ r.ganancia_stock_total }}
                             </td>
                         </tr>
@@ -184,11 +182,11 @@
                     {% if repuestos %}
                     <tfoot class="table-secondary fw-bold">
                         <tr>
-                            <td colspan="4">Totales</td>
-                            <td class="text-end">—</td>
-                            <td class="text-center">{{ margen_promedio }}%</td>
-                            <td class="text-center">—</td>
-                            <td class="text-end text-success">${{ ganancia_potencial }}</td>
+                            <td colspan="4" class="text-nowrap">Totales</td>
+                            <td class="text-end text-nowrap">—</td>
+                            <td class="text-center text-nowrap">{{ margen_promedio }}%</td>
+                            <td class="text-center text-nowrap">—</td>
+                            <td class="text-end text-nowrap text-success">${{ ganancia_potencial }}</td>
                         </tr>
                     </tfoot>
                     {% endif %}
@@ -278,4 +276,24 @@ new Chart(ctx2, {
 }
 </style>
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(function(){
+    if ($.fn.DataTable && $('#tablaRepuestos tbody tr').length > 1) {
+        $('#tablaRepuestos').DataTable({
+            responsive: false,
+            scrollX: true,
+            paging: false,
+            searching: true,
+            info: false,
+            dom: '<"row mb-2"<"col-12 col-md-6"B><"col-12 col-md-6"f>>t',
+            buttons: ['copy', 'excel', 'pdf', 'print'],
+            language: { url: '//cdn.datatables.net/plug-ins/2.3.8/i18n/es-ES.json' },
+            columnDefs: [{ targets: '_all', className: 'text-nowrap' }]
+        });
+    }
+});
+</script>
 {% endblock %}
