@@ -142,6 +142,19 @@
     }
 }
 
+/* En móvil: Bootstrap 5 maneja los dropdowns con la clase .show */
+@media (max-width: 991.98px) {
+    .navbar .nav-item .dropdown-menu {
+        display: none;
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .navbar .nav-item .dropdown-menu.show {
+        display: block;
+    }
+}
+
 
 /*** Header ***/
 .carousel-caption {

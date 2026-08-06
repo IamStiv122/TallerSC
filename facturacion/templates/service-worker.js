@@ -1,5 +1,5 @@
 // CarServ — Service Worker PWA
-const CACHE_NAME = 'carserv-v1';
+const CACHE_NAME = 'carserv-v2';
 
 // Recursos principales a cachear al instalar el SW
 const STATIC_ASSETS = [
@@ -37,16 +37,22 @@ self.addEventListener('activate', event => {
 
 // Fetch: estrategia Network First (intenta red, si falla usa caché)
 self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+
   // Solo manejar peticiones GET
   if (event.request.method !== 'GET') return;
 
+  // No interceptar recursos de dominios externos (CDNs)
+  // Solo manejar recursos del mismo origen
+  if (url.origin !== self.location.origin) return;
+
   // No interceptar llamadas al admin de Django
-  if (event.request.url.includes('/admin/')) return;
+  if (url.pathname.startsWith('/admin/')) return;
 
   event.respondWith(
     fetch(event.request)
       .then(response => {
-        // Si la respuesta es válida, guardarla en caché
+        // Solo cachear respuestas válidas del mismo origen
         if (response && response.status === 200 && response.type === 'basic') {
           const responseClone = response.clone();
           caches.open(CACHE_NAME).then(cache => {

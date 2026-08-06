@@ -26,32 +26,34 @@
     });
     
     
-    // Dropdown on mouse hover
+    // Dropdown on mouse hover (desktop only)
+    // En móvil Bootstrap 5 maneja el click nativo con data-bs-toggle
     const $dropdown = $(".dropdown");
     const $dropdownToggle = $(".dropdown-toggle");
     const $dropdownMenu = $(".dropdown-menu");
     const showClass = "show";
-    
-    $(window).on("load resize", function() {
-        if (this.matchMedia("(min-width: 992px)").matches) {
-            $dropdown.hover(
-            function() {
+
+    function initDropdowns() {
+        if (window.matchMedia("(min-width: 992px)").matches) {
+            $dropdown.on("mouseenter.hoverDropdown", function() {
                 const $this = $(this);
                 $this.addClass(showClass);
                 $this.find($dropdownToggle).attr("aria-expanded", "true");
                 $this.find($dropdownMenu).addClass(showClass);
-            },
-            function() {
+            }).on("mouseleave.hoverDropdown", function() {
                 const $this = $(this);
                 $this.removeClass(showClass);
                 $this.find($dropdownToggle).attr("aria-expanded", "false");
                 $this.find($dropdownMenu).removeClass(showClass);
-            }
-            );
+            });
         } else {
-            $dropdown.off("mouseenter mouseleave");
+            // En móvil: quitar hover y dejar que Bootstrap maneje el click
+            $dropdown.off("mouseenter.hoverDropdown mouseleave.hoverDropdown");
         }
-    });
+    }
+
+    initDropdowns();
+    $(window).on("resize", initDropdowns);
     
     
     // Back to top button
