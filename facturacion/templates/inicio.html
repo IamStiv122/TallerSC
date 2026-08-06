@@ -15,6 +15,9 @@
                                     <h6 class="text-white text-uppercase mb-3 animated slideInDown">// Servicio Automotriz //</h6>
                                     <h1 class="display-3 text-white mb-4 pb-3 animated slideInDown">Centro de Servicio Calificado de Reparación de Autos</h1>
                                     <a href="" class="btn btn-primary py-3 px-5 animated slideInDown">Saber Más<i class="fa fa-arrow-right ms-3"></i></a>
+                                    <button id="btn-instalar-pwa" class="btn btn-light py-3 px-5 ms-3 animated slideInDown" style="display:none;">
+                                        <i class="fa fa-download me-2"></i>Descargar App
+                                    </button>
                                 </div>
                                 <div class="col-lg-5 d-none d-lg-flex animated zoomIn">
                                     <img class="img-fluid" src="{% static 'img/carousel-1.png' %}" alt="">
@@ -32,6 +35,9 @@
                                     <h6 class="text-white text-uppercase mb-3 animated slideInDown">// Servicio Automotriz //</h6>
                                     <h1 class="display-3 text-white mb-4 pb-3 animated slideInDown">Centro de Servicio Calificado de Lavado de Autos</h1>
                                     <a href="" class="btn btn-primary py-3 px-5 animated slideInDown">Saber Más<i class="fa fa-arrow-right ms-3"></i></a>
+                                    <button id="btn-instalar-pwa-2" class="btn btn-light py-3 px-5 ms-3 animated slideInDown" style="display:none;">
+                                        <i class="fa fa-download me-2"></i>Descargar App
+                                    </button>
                                 </div>
                                 <div class="col-lg-5 d-none d-lg-flex animated zoomIn">
                                     <img class="img-fluid" src="{% static 'img/carousel-2.png' %}" alt="">
@@ -340,4 +346,39 @@
     </div>
     <!-- Testimonial End -->
     
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Captura el evento antes de que el navegador muestre el prompt de instalación
+    let deferredPrompt = null;
+    const btnsPWA = document.querySelectorAll('#btn-instalar-pwa, #btn-instalar-pwa-2');
+
+    window.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault();
+        deferredPrompt = e;
+        // Mostrar todos los botones de instalación
+        btnsPWA.forEach(btn => btn.style.display = 'inline-block');
+    });
+
+    btnsPWA.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(function (result) {
+                if (result.outcome === 'accepted') {
+                    // Ocultar botones tras instalar
+                    btnsPWA.forEach(b => b.style.display = 'none');
+                }
+                deferredPrompt = null;
+            });
+        });
+    });
+
+    // Si ya está instalada como PWA, ocultar el botón
+    window.addEventListener('appinstalled', function () {
+        btnsPWA.forEach(btn => btn.style.display = 'none');
+        deferredPrompt = null;
+    });
+</script>
 {% endblock %}

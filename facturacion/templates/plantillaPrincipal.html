@@ -112,15 +112,15 @@
                     {% if request.user.rol == 'admin' or request.user.is_superuser %}
                     <a href="/dashboard/" class="nav-item nav-link">Dashboard</a>
                     <div class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Personas</a>
-                        <div class="dropdown-menu fade-up m-0">
+                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">Personas</a>
+                        <div class="dropdown-menu m-0">
                             <a href="/clientes/"  class="dropdown-item">Clientes</a>
                             <a href="/mecanicos/" class="dropdown-item">Mecánicos</a>
                         </div>
                     </div>
                     <div class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Gestión</a>
-                        <div class="dropdown-menu fade-up m-0">
+                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">Gestión</a>
+                        <div class="dropdown-menu m-0">
                             <a href="/vehiculos/" class="dropdown-item">Vehículos</a>
                             <a href="/ordenes/"   class="dropdown-item">Órdenes de Trabajo</a>
                             <a href="/bahias/"    class="dropdown-item">Bahías / Elevadores</a>
@@ -129,17 +129,10 @@
                     </div>
                     <a href="/calendario/" class="nav-item nav-link">Calendario</a>
                     <div class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                            <i></i>Reportes
-                        </a>
-                        <div class="dropdown-menu fade-up m-0">
-                            <div class="dropdown-divider"></div>
-                            <a href="/reportes/eficiencia/" class="dropdown-item">
-                                <i"></i>Eficiencia Operativa
-                            </a>
-                            <a href="/reportes/repuestos/" class="dropdown-item">
-                                <i></i>Margen de Repuestos
-                            </a>
+                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">Reportes</a>
+                        <div class="dropdown-menu m-0">
+                            <a href="/reportes/eficiencia/" class="dropdown-item">Eficiencia Operativa</a>
+                            <a href="/reportes/repuestos/" class="dropdown-item">Margen de Repuestos</a>
                         </div>
                     </div>
 
@@ -164,10 +157,10 @@
 
                     <!-- Perfil + Cerrar sesión (todos los autenticados) -->
                     <div class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">
                             <i class="fa fa-user-circle me-1"></i>{{ request.user.get_full_name|default:request.user.username }}
                         </a>
-                        <div class="dropdown-menu dropdown-menu-end fade-up m-0">
+                        <div class="dropdown-menu dropdown-menu-end m-0">
                             <span class="dropdown-item-text text-muted small">
                                 <i class="fa fa-id-badge me-1"></i>{{ request.user.get_rol_display }}
                             </span>
@@ -184,7 +177,7 @@
 
             <!-- Botón Ingresar: solo si NO está autenticado -->
             {% if not request.user.is_authenticated %}
-            <a href="/login/" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">
+            <a href="/login/" class="btn btn-primary py-2 px-4 mx-4 mx-lg-0 py-lg-4 px-lg-5 d-lg-block">
                 Ingresar<i class="fa fa-arrow-right ms-3"></i>
             </a>
             {% endif %}
