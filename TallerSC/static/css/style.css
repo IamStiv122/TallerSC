@@ -409,3 +409,106 @@
     padding-right: 0;
     border-right: none;
 }
+
+
+/*** Responsividad móvil general ***/
+
+/* Encabezados más compactos en móvil */
+@media (max-width: 575.98px) {
+    h1 { font-size: 1.6rem; }
+    h2 { font-size: 1.4rem; }
+    h5 { font-size: 1rem; }
+
+    /* Padding del contenido principal */
+    .container, .container-xxl {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    /* Botones de acción más compactos */
+    .btn {
+        font-size: 0.82rem;
+        padding: 6px 10px;
+    }
+
+    /* Botones de acción en tablas */
+    .btn-outline-warning, .btn-outline-danger, .btn-outline-primary {
+        padding: 4px 8px;
+        font-size: 0.8rem;
+    }
+
+    /* Tablas DataTables */
+    .dataTables_wrapper .dt-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-bottom: 8px;
+    }
+    .dataTables_wrapper .dt-buttons .dt-button {
+        font-size: 0.78rem;
+        padding: 4px 8px;
+    }
+    .dataTables_wrapper .dataTables_filter label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.85rem;
+    }
+    .dataTables_wrapper .dataTables_filter input {
+        width: 140px;
+    }
+
+    /* Cards del dashboard */
+    .card-body h2 {
+        font-size: 1.8rem;
+    }
+    .card-body .rounded-circle {
+        padding: 10px !important;
+    }
+
+    /* Navbar brand más pequeño en móvil */
+    .navbar-brand h2 {
+        font-size: 1.3rem;
+    }
+
+    /* Carousel */
+    .carousel-caption h1 {
+        font-size: 1.4rem;
+    }
+    .carousel-caption h6 {
+        font-size: 0.75rem;
+    }
+
+    /* Footer */
+    .footer .col-lg-3 {
+        margin-bottom: 1rem;
+    }
+
+    /* Página de inicio — sección de servicios */
+    .service .nav-link h4 {
+        font-size: 0.95rem;
+    }
+}
+
+/* Tablas con scroll horizontal en todos los tamaños pequeños */
+@media (max-width: 767.98px) {
+    .table-responsive {
+        border: 0;
+    }
+
+    /* DataTables: información y paginación centradas */
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        text-align: center;
+        margin-top: 8px;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        padding: 4px 8px;
+        font-size: 0.85rem;
+    }
+
+    /* Expandir columna de acciones en responsive */
+    td.text-nowrap {
+        white-space: nowrap;
+    }
+}

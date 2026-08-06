@@ -65,6 +65,16 @@
 
 {% block scripts %}
 <script>
-$(function(){ if ($.fn.DataTable) { $('#tbl_ordenes').DataTable({ dom: 'Bfrtip', buttons: ['copy','excel','pdf','print'] }); } });
+$(function(){
+    if ($.fn.DataTable) {
+        $('#tbl_ordenes').DataTable({
+            responsive: true,
+            dom: '<"row"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>>rtip',
+            buttons: ['copy', 'excel', 'pdf', 'print'],
+            language: { url: '//cdn.datatables.net/plug-ins/2.3.8/i18n/es-ES.json' },
+            order: [[6, 'desc']]
+        });
+    }
+});
 </script>
 {% endblock %}

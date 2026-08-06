@@ -120,6 +120,9 @@
 }
 </style>
 
+{% endblock %}
+
+{% block scripts %}
 <script>
 $(function () {
     const CSRF = '{{ csrf_token }}';
@@ -191,14 +194,12 @@ $(function () {
         const gapX  = 210, gapY = 200;
         const ocupadas = new Set();
 
-        // Primero registrar las ya posicionadas
         cards.each(function () {
             const x = parseInt($(this).css('left'));
             const y = parseInt($(this).css('top'));
             ocupadas.add(x + ',' + y);
         });
 
-        // Detectar las que están superpuestas (mismo left/top que otra)
         const posiciones = {};
         cards.each(function () {
             const x = parseInt($(this).css('left'));
@@ -211,7 +212,6 @@ $(function () {
         let col = 0, row = 0;
         Object.values(posiciones).forEach(function (grupo) {
             if (grupo.length > 1) {
-                // Varios en la misma posición: redistribuir todos
                 grupo.forEach(function (el) {
                     let nx, ny;
                     do {
@@ -238,5 +238,4 @@ $(function () {
     })();
 });
 </script>
-
 {% endblock %}
