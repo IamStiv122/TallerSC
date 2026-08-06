@@ -1,17 +1,18 @@
 {% extends "plantillaPrincipal.html" %}
 {% block contenido %}
-<center>
-    <br>
-    <h1><b>Inventario de Repuestos</b>
-        <a href="/repuestos/nuevo/" class="btn btn-info text-white"><i class="fa fa-plus"></i> Nuevo Repuesto</a>
-        <a href="/repuestos/reporte/" onclick="window.open(this.href, 'Reporte de Repuestos', 'width=900,height=700, resizable=yes, scrollbars=yes'); return false;" class="btn btn-dark text-white">
-            <i class="fa fa-print"></i> Imprimir Repuestos
-        </a>
-    </h1>
-</center>
-<br>
-<div class="container">
-    <table id="tbl_repuestos" class="table table-striped table-hover table-bordered">
+<div class="row justify-content-center">
+    <div class="col-12">
+        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2 mb-3">
+            <h1 class="mb-0"><b>Inventario de Repuestos</b></h1>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="/repuestos/nuevo/" class="btn btn-info text-white"><i class="fa fa-plus"></i> Nuevo Repuesto</a>
+                <a href="/repuestos/reporte/" onclick="window.open(this.href, 'Reporte de Repuestos', 'width=900,height=700, resizable=yes, scrollbars=yes'); return false;" class="btn btn-dark text-white">
+                    <i class="fa fa-print"></i> Imprimir Repuestos
+                </a>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table id="tbl_repuestos" class="table table-striped table-hover table-bordered">
         <thead class="table-dark">
             <tr>
                 <th>CÓDIGO</th>
@@ -41,6 +42,9 @@
         </tbody>
     </table>
 </div>
+{% endblock %}
+
+{% block scripts %}
 <script>
 $(function(){ if ($.fn.DataTable) { $('#tbl_repuestos').DataTable({ dom: 'Bfrtip', buttons: ['copy','excel','pdf','print'] }); } });
 </script>

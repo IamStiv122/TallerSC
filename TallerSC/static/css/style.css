@@ -319,6 +319,21 @@
     transition: .5s;
 }
 
+/* Responsive table support for mobile layouts */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 767.98px) {
+    .table-responsive .table th,
+    .table-responsive .table td {
+        white-space: normal !important;
+        word-break: break-word !important;
+    }
+}
+
+
 .testimonial-carousel .owl-dot.active {
     background: var(--primary);
     border-color: var(--primary);

@@ -1,19 +1,20 @@
 {% extends "plantillaPrincipal.html" %}
 {% block contenido %}
-<center>
-    <br>
-    <h1><b>Listado de Vehículos</b>
-        <a href="/vehiculos/nuevo/" class="btn btn-info text-white">
-            <i class="fa fa-plus"></i> Nuevo Vehículo
-        </a>
-        <a href="/vehiculos/reporte/" onclick="window.open(this.href, 'Reporte de Vehículos', 'width=900,height=700, resizable=yes, scrollbars=yes'); return false;" class="btn btn-dark text-white">
-            <i class="fa fa-print"></i> Imprimir Vehículos
-        </a>
-    </h1>
-</center>
-<br>
-<div class="container">
-    <table id="tbl_vehiculos" class="table table-striped table-hover table-bordered">
+<div class="row justify-content-center">
+    <div class="col-12">
+        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2 mb-3">
+            <h1 class="mb-0"><b>Listado de Vehículos</b></h1>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="/vehiculos/nuevo/" class="btn btn-info text-white">
+                    <i class="fa fa-plus"></i> Nuevo Vehículo
+                </a>
+                <a href="/vehiculos/reporte/" onclick="window.open(this.href, 'Reporte de Vehículos', 'width=900,height=700, resizable=yes, scrollbars=yes'); return false;" class="btn btn-dark text-white">
+                    <i class="fa fa-print"></i> Imprimir Vehículos
+                </a>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table id="tbl_vehiculos" class="table table-striped table-hover table-bordered">
         <thead class="table-dark">
             <tr>
                 <th>ID</th>
@@ -43,6 +44,9 @@
         </tbody>
     </table>
 </div>
+{% endblock %}
+
+{% block scripts %}
 <script>
 $(function(){
     if ($.fn.DataTable) {

@@ -38,6 +38,9 @@
         </tbody>
     </table>
 </div>
+{% endblock %}
+
+{% block scripts %}
 <script>
 $(function(){ if ($.fn.DataTable) { $('#tbl_mecanicos').DataTable({ dom: 'Bfrtip', buttons: ['copy','excel','pdf','print'] }); } });
 </script>

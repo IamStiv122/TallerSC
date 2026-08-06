@@ -1,25 +1,20 @@
 {% extends "plantillaPrincipal.html" %}
 {% block contenido %}
-<center>
-    <br> 
-    <h1>
-        <b>Listado de Clientes</b>
-        <a href="/clientes/nuevo/" class="btn btn-info text-white">
-            <i class="fa fa-plus"></i> Nuevo Cliente
-        </a>
-        <a href="/reportes/clientes/" 
-            onclick="window.open(this.href, 'Reporte de Clientes', 'width=800,height=600, resizable=yes, scrollbars=yes'); return false;"
-            class="btn btn-dark text-white">
-            <i class="fa fa-print"></i> Imprimir Clientes
-        </a>
-    </h1>
-</center>
-<br>
-
-<div class="row">
-    <div class="col-md-2"></div>
-    <div class="col-md-8">
-        <table id="tbl_clientes" class="table table-striped table-hover table-bordered">
+<div class="row justify-content-center">
+    <div class="col-12">
+        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-2 mb-3">
+            <h1 class="mb-0"><b>Listado de Clientes</b></h1>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="/clientes/nuevo/" class="btn btn-info text-white">
+                    <i class="fa fa-plus"></i> Nuevo Cliente
+                </a>
+                <a href="/reportes/clientes/" onclick="window.open(this.href, 'Reporte de Clientes', 'width=800,height=600, resizable=yes, scrollbars=yes'); return false;" class="btn btn-dark text-white">
+                    <i class="fa fa-print"></i> Imprimir Clientes
+                </a>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table id="tbl_clientes" class="table table-striped table-hover table-bordered">
             <thead class="table-dark">
                 <tr>
                     <th>ID</th>
@@ -67,9 +62,12 @@
                 {% endfor %}
             </tbody>
         </table>
-    </div>
+        </div>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
 <script>
 $(function(){
     if ($.fn.DataTable) {
@@ -77,5 +75,4 @@ $(function(){
     }
 });
 </script>
-
 {% endblock %}
